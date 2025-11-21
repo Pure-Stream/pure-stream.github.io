@@ -1,5 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import Navigation from '../components/Navigation.astro';
 import { getSession } from 'auth-astro/server';
 
 export const prerender = false; // Need server-side rendering for session
@@ -8,46 +9,7 @@ const session = await getSession(Astro.request);
 ---
 
 <Layout title="StudyBible - Native Bible Study Application">
-  <!-- Navigation -->
-  <nav class="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-700 shadow-sm">
-    <div class="max-w-7xl mx-auto px-6 py-3">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center gap-2">
-          <span class="text-2xl">📖</span>
-          <span class="font-display text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">StudyBible</span>
-        </div>
-        <div class="flex items-center gap-6">
-          <a href="#features" class="text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-medium transition-colors">Features</a>
-          <a href="#download" class="text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-medium transition-colors">Download</a>
-          <a href="/feedback" class="text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-medium transition-colors">Feedback</a>
-
-          <!-- Theme Toggle Button -->
-          <button
-            id="themeToggle"
-            class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all"
-            aria-label="Toggle theme"
-          >
-            <svg id="sunIcon" class="w-5 h-5 text-slate-600 dark:text-slate-400 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
-            </svg>
-            <svg id="moonIcon" class="w-5 h-5 text-slate-600 dark:text-slate-400 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
-            </svg>
-          </button>
-
-          {session ? (
-            <a href="/dashboard" class="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-lg hover:shadow-lg transition-all">
-              Dashboard
-            </a>
-          ) : (
-            <a href="/login" class="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-lg hover:shadow-lg transition-all">
-              Login
-            </a>
-          )}
-        </div>
-      </div>
-    </div>
-  </nav>
+  <Navigation currentPage="home" />
 
   <main>
     <!-- Compact Hero Section -->
@@ -276,42 +238,15 @@ const session = await getSession(Astro.request);
   </main>
 </Layout>
 
-<script is:inline>
-  // Theme toggle functionality
-  function initTheme() {
-    // Check localStorage or system preference
-    const theme = localStorage.getItem('theme') ||
-      (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+<script>
+  import { initTheme, setupThemeToggle } from '../scripts/theme';
 
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }
-
-  function toggleTheme() {
-    const html = document.documentElement;
-    const isDark = html.classList.contains('dark');
-
-    if (isDark) {
-      html.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-    } else {
-      html.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    }
-  }
-
-  // Initialize theme before page renders
+  // Initialize theme immediately to prevent flash
   initTheme();
 
-  // Add click listener when DOM is ready
+  // Setup theme toggle when DOM is ready
   document.addEventListener('DOMContentLoaded', () => {
-    const themeToggle = document.getElementById('themeToggle');
-    if (themeToggle) {
-      themeToggle.addEventListener('click', toggleTheme);
-    }
+    setupThemeToggle();
   });
 </script>
 

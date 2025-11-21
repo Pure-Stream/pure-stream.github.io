@@ -1,5 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import { API_ROUTES, ROUTES, AUTH_CONFIG } from '../config/constants';
 
 export const prerender = false; // This page needs to be server-rendered for auth
 ---
@@ -9,7 +10,7 @@ export const prerender = false; // This page needs to be server-rendered for aut
     <div class="max-w-md w-full">
       <!-- Back to Home -->
       <div class="text-center mb-8">
-        <a href="/" class="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 transition-colors">
+        <a href={ROUTES.HOME} class="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 transition-colors">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
           </svg>
@@ -28,7 +29,7 @@ export const prerender = false; // This page needs to be server-rendered for aut
 
         <!-- OAuth Providers -->
         <div class="space-y-3 mb-6">
-          <form method="post" action="/api/auth/signin/google">
+          <form method="post" action={API_ROUTES.GOOGLE_SIGNIN}>
             <button
               type="submit"
               class="w-full flex items-center justify-center gap-3 px-6 py-3 bg-white border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:shadow-md transition-all group"
@@ -43,7 +44,7 @@ export const prerender = false; // This page needs to be server-rendered for aut
             </button>
           </form>
 
-          <form method="post" action="/api/auth/signin/github">
+          <form method="post" action={API_ROUTES.GITHUB_SIGNIN}>
             <button
               type="submit"
               class="w-full flex items-center justify-center gap-3 px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-all"
@@ -105,11 +106,11 @@ export const prerender = false; // This page needs to be server-rendered for aut
               id="password"
               name="password"
               required
-              minlength="8"
+              minlength={AUTH_CONFIG.MIN_PASSWORD_LENGTH}
               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
-              placeholder="At least 8 characters"
+              placeholder={`At least ${AUTH_CONFIG.MIN_PASSWORD_LENGTH} characters`}
             />
-            <p class="text-xs text-gray-500 mt-1">Must be at least 8 characters long</p>
+            <p class="text-xs text-gray-500 mt-1">Must be at least {AUTH_CONFIG.MIN_PASSWORD_LENGTH} characters long</p>
           </div>
 
           <div>
@@ -121,7 +122,7 @@ export const prerender = false; // This page needs to be server-rendered for aut
               id="confirmPassword"
               name="confirmPassword"
               required
-              minlength="8"
+              minlength={AUTH_CONFIG.MIN_PASSWORD_LENGTH}
               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
               placeholder="Re-enter your password"
             />
@@ -136,9 +137,9 @@ export const prerender = false; // This page needs to be server-rendered for aut
             />
             <label for="terms" class="text-sm text-gray-600">
               I agree to the
-              <a href="/terms" class="text-blue-600 hover:underline">Terms of Service</a>
+              <a href={ROUTES.TERMS} class="text-blue-600 hover:underline">Terms of Service</a>
               and
-              <a href="/privacy" class="text-blue-600 hover:underline">Privacy Policy</a>
+              <a href={ROUTES.PRIVACY} class="text-blue-600 hover:underline">Privacy Policy</a>
             </label>
           </div>
 
@@ -153,7 +154,7 @@ export const prerender = false; // This page needs to be server-rendered for aut
         <!-- Login Link -->
         <p class="text-center text-sm text-gray-600 mt-6">
           Already have an account?
-          <a href="/login" class="text-blue-600 hover:text-blue-700 font-semibold">
+          <a href={ROUTES.LOGIN} class="text-blue-600 hover:text-blue-700 font-semibold">
             Sign in
           </a>
         </p>
@@ -185,7 +186,6 @@ export const prerender = false; // This page needs to be server-rendered for aut
       };
 
       try {
-        // TODO: Replace with actual API endpoint
         const response = await fetch('/api/auth/signup', {
           method: 'POST',
           headers: {

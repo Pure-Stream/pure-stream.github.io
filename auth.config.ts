@@ -59,7 +59,7 @@ export default defineConfig({
     }) as Provider,
   ],
   pages: {
-    signIn: '/login',
+    signIn: '/login', // ROUTES.LOGIN from constants
   },
   callbacks: {
     async jwt({ token, user }) {

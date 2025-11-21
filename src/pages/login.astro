@@ -1,5 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import { API_ROUTES, ROUTES } from '../config/constants';
 
 export const prerender = false; // This page needs to be server-rendered for auth
 ---
@@ -9,7 +10,7 @@ export const prerender = false; // This page needs to be server-rendered for aut
     <div class="max-w-md w-full">
       <!-- Back to Home -->
       <div class="text-center mb-8">
-        <a href="/" class="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 transition-colors">
+        <a href={ROUTES.HOME} class="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 transition-colors">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
           </svg>
@@ -28,7 +29,7 @@ export const prerender = false; // This page needs to be server-rendered for aut
 
         <!-- OAuth Providers -->
         <div class="space-y-3 mb-6">
-          <form method="post" action="/api/auth/signin/google">
+          <form method="post" action={API_ROUTES.GOOGLE_SIGNIN}>
             <button
               type="submit"
               class="w-full flex items-center justify-center gap-3 px-6 py-3 bg-white border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:shadow-md transition-all group"
@@ -44,7 +45,7 @@ export const prerender = false; // This page needs to be server-rendered for aut
           </form>
 
           <!-- Add GitHub OAuth option -->
-          <form method="post" action="/api/auth/signin/github">
+          <form method="post" action={API_ROUTES.GITHUB_SIGNIN}>
             <button
               type="submit"
               class="w-full flex items-center justify-center gap-3 px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-all"
@@ -68,7 +69,7 @@ export const prerender = false; // This page needs to be server-rendered for aut
         </div>
 
         <!-- Email/Password Form -->
-        <form method="post" action="/api/auth/callback/credentials" class="space-y-4">
+        <form method="post" action={API_ROUTES.CALLBACK_CREDENTIALS} class="space-y-4">
           <div>
             <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
               Email Address
@@ -102,7 +103,7 @@ export const prerender = false; // This page needs to be server-rendered for aut
               <input type="checkbox" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" />
               <span class="text-gray-600">Remember me</span>
             </label>
-            <a href="/forgot-password" class="text-blue-600 hover:text-blue-700">
+            <a href={ROUTES.FORGOT_PASSWORD} class="text-blue-600 hover:text-blue-700">
               Forgot password?
             </a>
           </div>
@@ -118,7 +119,7 @@ export const prerender = false; // This page needs to be server-rendered for aut
         <!-- Sign Up Link -->
         <p class="text-center text-sm text-gray-600 mt-6">
           Don't have an account?
-          <a href="/signup" class="text-blue-600 hover:text-blue-700 font-semibold">
+          <a href={ROUTES.SIGNUP} class="text-blue-600 hover:text-blue-700 font-semibold">
             Sign up for free
           </a>
         </p>
@@ -127,9 +128,9 @@ export const prerender = false; // This page needs to be server-rendered for aut
       <!-- Terms -->
       <p class="text-center text-xs text-gray-500 mt-6">
         By signing in, you agree to our
-        <a href="/terms" class="text-blue-600 hover:underline">Terms of Service</a>
+        <a href={ROUTES.TERMS} class="text-blue-600 hover:underline">Terms of Service</a>
         and
-        <a href="/privacy" class="text-blue-600 hover:underline">Privacy Policy</a>
+        <a href={ROUTES.PRIVACY} class="text-blue-600 hover:underline">Privacy Policy</a>
       </p>
     </div>
   </div>
