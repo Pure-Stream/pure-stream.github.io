@@ -1,4 +1,4 @@
-const BASE_URL = 'http://localhost:4324';
+const BASE_URL = 'http://localhost:4323';
 const testEmail = `test-${Date.now()}@gmail.com`;
 const testPassword = 'testtest123';
 
@@ -50,9 +50,9 @@ async function testAuthFlow() {
 
     console.log('✅ Signup successful!\n');
 
-    // Step 3: Try to sign in with credentials
+    // Step 3: Try to sign in with email
     console.log(`📝 Step 3: Signing in with ${testEmail}...`);
-    const signinResponse = await fetch(`${BASE_URL}/api/auth/sign-in/credentials`, {
+    const signinResponse = await fetch(`${BASE_URL}/api/auth/sign-in/email`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

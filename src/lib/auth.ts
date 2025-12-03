@@ -104,9 +104,10 @@ const wrappedDb = {
         delete args.data.accountId;
       }
 
-      // Remove fields that should not be in Account table
-      // Password is stored in User model for credential accounts
-      if (args.data.password) {
+      // Keep password field for credential accounts - better-auth stores credentials in Account table
+      // For non-credential accounts, password should not be present
+      if (args.data.password && args.data.provider !== 'credential') {
+        console.log('⚠️ Removing password field from non-credential account');
         delete args.data.password;
       }
       // createdAt and updatedAt are handled automatically by Prisma
