@@ -25,12 +25,17 @@ export default defineConfig({
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
+        // Log to stderr to ensure it shows up
+        console.error('🔐 AUTHORIZE FUNCTION CALLED');
+        console.error('Credentials:', JSON.stringify(credentials));
+
         console.log('🔐 Authorize called with:', {
           email: credentials?.email,
           hasPassword: !!credentials?.password
         });
 
         if (!credentials?.email || !credentials?.password) {
+          console.error('❌ Missing credentials');
           console.log('❌ Missing credentials');
           return null;
         }

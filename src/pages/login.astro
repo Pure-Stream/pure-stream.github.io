@@ -155,80 +155,33 @@ export const prerender = false; // This page needs to be server-rendered for aut
     errorDiv.classList.add('hidden');
 
     try {
-      // Get CSRF token
-      console.log('Fetching CSRF token...');
-      const csrfResponse = await fetch('/api/auth/csrf');
-      const csrfData = await csrfResponse.json();
-      console.log('CSRF response:', csrfData);
-      const { csrfToken } = csrfData;
+      // Use custom signin endpoint
+      console.log('Attempting sign in with custom endpoint...');
 
-      // Sign in with credentials using form data
-      console.log('Attempting sign in...');
-      const formData = new URLSearchParams();
-      formData.append('email', email);
-      formData.append('password', password);
-      formData.append('csrfToken', csrfToken);
-      formData.append('callbackUrl', '/dashboard');
-
-      console.log('Form data:', formData.toString());
-
-      const response = await fetch('/api/auth/signin/credentials', {
+      const response = await fetch('/api/auth/signin-custom', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
+          'Content-Type': 'application/json',
         },
-        body: formData.toString(),
-        redirect: 'manual', // Don't follow redirects
+        body: JSON.stringify({
+          email,
+          password
+        })
       });
 
-      console.log('Response status:', response.status);
-      console.log('Response type:', response.type);
+      const data = await response.json();
+      console.log('Response:', data);
 
-      const location = response.headers.get('location');
-      console.log('Location header:', location);
-
-      // Check for redirect (302 or 303)
-      if (response.status === 302 || response.status === 303) {
-        if (location) {
-          // Check if redirect is to an error page
-          if (location.includes('error')) {
-            errorDiv.textContent = 'Invalid email or password';
-            errorDiv.classList.remove('hidden');
-            button.disabled = false;
-            button.textContent = 'Sign In';
-          } else {
-            // Successful login, follow the redirect
-            console.log('Login successful, redirecting to:', location);
-            window.location.href = location;
-          }
-        } else {
-          // No location header, assume success and go to dashboard
-          window.location.href = '/dashboard';
-        }
+      if (response.ok && data.success) {
+        console.log('✅ Login successful!');
+        // Redirect to dashboard
+        window.location.href = '/dashboard';
       } else {
-        // Not a redirect, check content type
-        const contentType = response.headers.get('content-type');
-        console.log('Content-Type:', contentType);
-
-        if (contentType && contentType.includes('application/json')) {
-          const data = await response.json();
-          console.log('Response data:', data);
-
-          if (!data.error) {
-            window.location.href = '/dashboard';
-          } else {
-            errorDiv.textContent = data.error || 'Invalid email or password';
-            errorDiv.classList.remove('hidden');
-            button.disabled = false;
-            button.textContent = 'Sign In';
-          }
-        } else {
-          // HTML response, login failed
-          errorDiv.textContent = 'Invalid email or password';
-          errorDiv.classList.remove('hidden');
-          button.disabled = false;
-          button.textContent = 'Sign In';
-        }
+        // Show error message
+        errorDiv.textContent = data.error || 'Invalid email or password';
+        errorDiv.classList.remove('hidden');
+        button.disabled = false;
+        button.textContent = 'Sign In';
       }
     } catch (error) {
       console.error('Login error:', error);
