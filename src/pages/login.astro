@@ -69,7 +69,7 @@ export const prerender = false; // This page needs to be server-rendered for aut
         </div>
 
         <!-- Email/Password Form -->
-        <form method="post" action={API_ROUTES.CALLBACK_CREDENTIALS} class="space-y-4">
+        <form id="credentials-form" class="space-y-4">
           <div>
             <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
               Email Address
@@ -98,6 +98,8 @@ export const prerender = false; // This page needs to be server-rendered for aut
             />
           </div>
 
+          <div id="error-message" class="hidden text-red-600 text-sm"></div>
+
           <div class="flex items-center justify-between text-sm">
             <label class="flex items-center gap-2 cursor-pointer">
               <input type="checkbox" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" />
@@ -110,6 +112,7 @@ export const prerender = false; // This page needs to be server-rendered for aut
 
           <button
             type="submit"
+            id="signin-button"
             class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold py-3 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all shadow-md hover:shadow-lg"
           >
             Sign In
@@ -135,6 +138,107 @@ export const prerender = false; // This page needs to be server-rendered for aut
     </div>
   </div>
 </Layout>
+
+<script>
+  document.getElementById('credentials-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const form = e.target as HTMLFormElement;
+    const email = (form.querySelector('#email') as HTMLInputElement).value;
+    const password = (form.querySelector('#password') as HTMLInputElement).value;
+    const button = document.getElementById('signin-button') as HTMLButtonElement;
+    const errorDiv = document.getElementById('error-message') as HTMLDivElement;
+
+    // Disable button and show loading state
+    button.disabled = true;
+    button.textContent = 'Signing in...';
+    errorDiv.classList.add('hidden');
+
+    try {
+      // Get CSRF token
+      console.log('Fetching CSRF token...');
+      const csrfResponse = await fetch('/api/auth/csrf');
+      const csrfData = await csrfResponse.json();
+      console.log('CSRF response:', csrfData);
+      const { csrfToken } = csrfData;
+
+      // Sign in with credentials using form data
+      console.log('Attempting sign in...');
+      const formData = new URLSearchParams();
+      formData.append('email', email);
+      formData.append('password', password);
+      formData.append('csrfToken', csrfToken);
+      formData.append('callbackUrl', '/dashboard');
+
+      console.log('Form data:', formData.toString());
+
+      const response = await fetch('/api/auth/signin/credentials', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: formData.toString(),
+        redirect: 'manual', // Don't follow redirects
+      });
+
+      console.log('Response status:', response.status);
+      console.log('Response type:', response.type);
+
+      const location = response.headers.get('location');
+      console.log('Location header:', location);
+
+      // Check for redirect (302 or 303)
+      if (response.status === 302 || response.status === 303) {
+        if (location) {
+          // Check if redirect is to an error page
+          if (location.includes('error')) {
+            errorDiv.textContent = 'Invalid email or password';
+            errorDiv.classList.remove('hidden');
+            button.disabled = false;
+            button.textContent = 'Sign In';
+          } else {
+            // Successful login, follow the redirect
+            console.log('Login successful, redirecting to:', location);
+            window.location.href = location;
+          }
+        } else {
+          // No location header, assume success and go to dashboard
+          window.location.href = '/dashboard';
+        }
+      } else {
+        // Not a redirect, check content type
+        const contentType = response.headers.get('content-type');
+        console.log('Content-Type:', contentType);
+
+        if (contentType && contentType.includes('application/json')) {
+          const data = await response.json();
+          console.log('Response data:', data);
+
+          if (!data.error) {
+            window.location.href = '/dashboard';
+          } else {
+            errorDiv.textContent = data.error || 'Invalid email or password';
+            errorDiv.classList.remove('hidden');
+            button.disabled = false;
+            button.textContent = 'Sign In';
+          }
+        } else {
+          // HTML response, login failed
+          errorDiv.textContent = 'Invalid email or password';
+          errorDiv.classList.remove('hidden');
+          button.disabled = false;
+          button.textContent = 'Sign In';
+        }
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      errorDiv.textContent = 'An error occurred. Please try again.';
+      errorDiv.classList.remove('hidden');
+      button.disabled = false;
+      button.textContent = 'Sign In';
+    }
+  });
+</script>
 
 <style>
   /* Add subtle animation to the card */

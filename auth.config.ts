@@ -25,7 +25,13 @@ export default defineConfig({
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
+        console.log('🔐 Authorize called with:', {
+          email: credentials?.email,
+          hasPassword: !!credentials?.password
+        });
+
         if (!credentials?.email || !credentials?.password) {
+          console.log('❌ Missing credentials');
           return null;
         }
 
@@ -34,23 +40,38 @@ export default defineConfig({
         const bcrypt = await import('bcryptjs');
 
         // Find user in database
+        console.log('🔍 Looking up user:', credentials.email);
         const user = await db.user.findUnique({
           where: { email: credentials.email as string }
         });
 
-        if (!user || !user.password) {
+        if (!user) {
+          console.log('❌ User not found');
           return null;
         }
 
+        if (!user.password) {
+          console.log('❌ User has no password (OAuth user)');
+          return null;
+        }
+
+        console.log('✅ User found:', user.email);
+
         // Verify password
+        console.log('🔑 Verifying password...');
         const isValid = await bcrypt.compare(
           credentials.password as string,
           user.password
         );
 
+        console.log('🔑 Password valid:', isValid);
+
         if (!isValid) {
+          console.log('❌ Invalid password');
           return null;
         }
+
+        console.log('✅ Authentication successful for:', user.email);
 
         // Return user object (without password!)
         return {
