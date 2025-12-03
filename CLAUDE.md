@@ -33,8 +33,8 @@ This is a hybrid SSR/SSG project with Astro handling both the build process and 
 ├── auth.config.ts            # Auth.js configuration (providers, callbacks)
 ├── prisma/
 │   ├── schema.prisma         # Database schema (User, Account, Session models)
-│   ├── dev.db                # SQLite database (development)
 │   └── migrations/           # Database migration history
+├── prisma.config.ts          # Prisma 7 configuration (database URL, migrations path)
 ├── src/
 │   ├── lib/
 │   │   └── db.ts            # Prisma client instance (singleton pattern)
@@ -108,6 +108,18 @@ Four models required by Auth.js:
 2. **Account**: OAuth provider accounts linked to users
 3. **Session**: Active user sessions with JWT tokens
 4. **VerificationToken**: Email verification tokens (future use)
+
+**Database Provider: PostgreSQL (Neon)**
+- Cloud-hosted PostgreSQL database on [Neon](https://neon.tech)
+- Free tier: 0.5GB storage, 3GB data transfer/month
+- Connection pooling enabled for better performance
+- Used for both development and production
+
+**Prisma Configuration (`prisma.config.ts`):**
+- **Prisma 7** uses separate config file (not in schema.prisma)
+- Database URL loaded from `.env` with `dotenv.config({ override: true })`
+- Override flag required to replace any existing env vars
+- Defines migrations path and datasource URL
 
 **Database Client (`src/lib/db.ts`):**
 - Singleton pattern to prevent multiple Prisma instances
@@ -281,6 +293,7 @@ Example: Creating a new issue:
 - Output mode: `'hybrid'` (SSR for auth pages, SSG for static content)
 
 ### `tailwind.config.mjs`
+- **Tailwind CSS v3** (v4 not yet compatible with `@astrojs/tailwind`)
 - Content paths: All `.astro` files in `src/`
 - Extended theme with custom primary colors and fonts
 
@@ -296,14 +309,21 @@ Example: Creating a new issue:
 
 ### `prisma/schema.prisma`
 - Database schema with Auth.js-required models
-- SQLite for development (production-ready for PostgreSQL/MySQL)
+- **PostgreSQL** provider (Neon cloud database)
 - User model with password field for credentials auth
 - Cascade deletes for referential integrity
 
+### `prisma.config.ts`
+- **Prisma 7** configuration file (separate from schema)
+- Loads environment variables with `dotenv.config({ override: true })`
+- Defines datasource URL and migrations path
+- Override flag prevents cached env vars from interfering
+
 ### `.env` & `.env.example`
 - Environment variables for OAuth secrets, database URL, auth secret
+- **DATABASE_URL**: Neon PostgreSQL connection string
 - `.env` is gitignored for security
-- `.env.example` provides template with instructions
+- `.env.example` provides template with Neon format
 
 ## Development Patterns
 
@@ -377,11 +397,19 @@ Navigation varies by page and authentication state:
 
 ### Environment Setup
 **Required for authentication:**
-1. Copy `.env.example` to `.env`
-2. Generate `AUTH_SECRET`: `node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"`
-3. Set up OAuth providers (see `SETUP_AUTH.md` for detailed instructions)
-4. Run `npx prisma generate` to create Prisma client
-5. Run `npx prisma migrate dev` to initialize database
+1. **Create Neon PostgreSQL database**: Sign up at https://neon.tech and create a project
+2. Copy `.env.example` to `.env`
+3. Add your **Neon connection string** to `DATABASE_URL` in `.env`
+4. Generate `AUTH_SECRET`: `node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"`
+5. Set up OAuth providers (see `SETUP_AUTH.md` for detailed instructions)
+6. Install dotenv: `npm install --save-dev dotenv`
+7. Run `npx prisma generate` to create Prisma client
+8. Run `npx prisma migrate dev` to initialize database
+
+**Important Notes:**
+- Database uses **PostgreSQL** (Neon cloud) for both development and production
+- Prisma 7 requires `dotenv` package to load `.env` file
+- `prisma.config.ts` uses `override: true` to prevent env var caching issues
 
 **See `SETUP_AUTH.md` for complete setup instructions.**
 
@@ -400,13 +428,47 @@ Running `npm run build` generates:
 - Server-side rendered pages for authentication routes
 - Optimized CSS and JS bundles
 - All assets copied from `public/`
-- Ready for deployment to SSR-capable hosts (Vercel, Netlify, Cloudflare Pages with Functions)
+- Ready for deployment to SSR-capable hosts
+
+**Recommended Deployment: Vercel (FREE)**
+
+1. **Install Vercel adapter:**
+   ```bash
+   npm install @astrojs/vercel
+   ```
+
+2. **Update `astro.config.mjs`:**
+   ```javascript
+   import vercel from '@astrojs/vercel/serverless';
+
+   export default defineConfig({
+     integrations: [tailwind(), auth()],
+     output: 'server',
+     adapter: vercel(), // Change from node()
+   });
+   ```
+
+3. **Deploy:**
+   ```bash
+   npx vercel deploy
+   ```
+
+4. **Add environment variables in Vercel dashboard:**
+   - `DATABASE_URL` - Your Neon PostgreSQL connection string
+   - `AUTH_SECRET` - Your auth secret from `.env`
+   - `GOOGLE_CLIENT_ID` & `GOOGLE_CLIENT_SECRET` (when configured)
+   - `GITHUB_CLIENT_ID` & `GITHUB_CLIENT_SECRET` (when configured)
+
+**Alternative Platforms:**
+- **Railway** (~$5/month) - Simple all-in-one platform
+- **Render** (FREE tier with cold starts) - Good for getting started
 
 **Deployment Requirements:**
 - Node.js runtime for SSR pages
 - Environment variables configured on host
-- Database accessible from deployment (or bundled SQLite)
+- **Neon PostgreSQL database** accessible from deployment (same DB for dev & prod)
 - OAuth redirect URIs updated for production domain
+- Update OAuth callback URLs to production domain
 
 ## Additional Documentation
 

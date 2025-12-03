@@ -5,6 +5,10 @@ import Credentials from '@auth/core/providers/credentials';
 import type { Provider } from '@auth/core/providers';
 
 export default defineConfig({
+  session: {
+    strategy: 'jwt', // Use JWT sessions (better for serverless)
+    maxAge: 30 * 24 * 60 * 60, // 30 days
+  },
   providers: [
     Google({
       clientId: import.meta.env.GOOGLE_CLIENT_ID,
@@ -62,14 +66,20 @@ export default defineConfig({
     signIn: '/login', // ROUTES.LOGIN from constants
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, account }) {
+      // Initial sign in - add user ID to token
       if (user) {
         token.id = user.id;
+      }
+      // OAuth sign in - save account info
+      if (account) {
+        token.accessToken = account.access_token;
       }
       return token;
     },
     async session({ session, token }) {
-      if (session.user) {
+      // Add user ID from token to session
+      if (session.user && token.id) {
         session.user.id = token.id as string;
       }
       return session;
