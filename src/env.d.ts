@@ -4,13 +4,23 @@
 declare namespace App {
   interface Locals {
     session: {
-      user?: {
-        id?: string;
-        email?: string;
-        name?: string;
+      user: {
+        id: string;
+        email: string;
+        name: string;
         image?: string;
+        emailVerified?: boolean;
+        createdAt?: Date;
+        updatedAt?: Date;
       };
-      expires?: string;
+      session: {
+        id: string;
+        userId: string;
+        expiresAt: Date;
+        token: string;
+        ipAddress?: string;
+        userAgent?: string;
+      };
     } | null;
   }
 }

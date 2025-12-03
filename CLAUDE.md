@@ -83,24 +83,49 @@ All pages import and use `src/layouts/Layout.astro` which provides:
 ## Authentication System
 
 ### Overview
-Complete authentication system built with **Auth.js** (formerly NextAuth), **Prisma ORM**, and **bcryptjs**.
+Complete authentication system built with **custom JWT authentication**, **Prisma ORM**, **bcryptjs**, and **jose** (JWT library).
 
 **Supported Authentication Methods:**
-1. **Google OAuth** - Sign in with Google account
-2. **GitHub OAuth** - Sign in with GitHub account
-3. **Email/Password** - Traditional credentials-based authentication
+1. **Email/Password** - Custom JWT-based authentication (fully working)
+2. **Google OAuth** - Sign in with Google account (configured via auth.config.ts)
+3. **GitHub OAuth** - Sign in with GitHub account (configured via auth.config.ts)
+
+**Important Architecture Note:**
+Due to compatibility issues with auth-astro's Credentials provider in Astro's SSR environment, we implemented a **custom JWT-based authentication system** that bypasses auth-astro for email/password logins while maintaining compatibility with OAuth providers.
+
+### Custom Authentication Implementation
+
+#### Custom Signin Endpoint (`src/pages/api/auth/signin-custom.ts`)
+Handles email/password authentication:
+1. **Validates credentials**: Checks email and password are provided
+2. **Finds user**: Queries database for user by email
+3. **Verifies password**: Uses bcrypt.compare to validate password hash
+4. **Creates JWT**: Signs JWT token with user data using jose library
+5. **Sets cookie**: Creates HTTP-only `auth-token` cookie with 30-day expiration
+6. **Returns JSON**: Success response with user data (no password)
+
+**Security Features:**
+- JWT signed with AUTH_SECRET from environment
+- HTTP-only cookies prevent XSS attacks
+- Secure flag enabled in production
+- 30-day token expiration
+- bcrypt password hashing with 10 salt rounds
+
+**Dependencies:**
+- `jose`: Modern JWT library for signing and verifying tokens
+- `bcryptjs`: Password hashing and verification
+- `@prisma/client`: Database ORM
+- `@prisma/adapter-pg`: PostgreSQL adapter for Prisma 7
+- `pg`: Node.js PostgreSQL client
 
 ### Configuration (`auth.config.ts`)
-Defines authentication providers and session callbacks:
-- **Providers**: Google, GitHub, and Credentials (email/password)
-- **Custom authorize function**: Validates email/password against database
-- **JWT & Session callbacks**: Attaches user ID to session
+Defines OAuth providers and session callbacks:
+- **Providers**: Google and GitHub OAuth (Credentials provider present but unused)
+- **JWT Strategy**: Uses JWT sessions for OAuth (not database sessions)
+- **Session callbacks**: Attaches user ID to session from token
 - **Custom pages**: Redirects to `/login` for sign-in
 
-**Important Notes:**
-- Uses dynamic imports in Credentials provider to avoid bundling issues
-- Password verification uses bcrypt.compare for security
-- Returns user object WITHOUT password field
+**Note:** The Credentials provider in auth.config.ts is not actively used due to compatibility issues with auth-astro in Astro's middleware bundling. Email/password authentication uses the custom signin endpoint instead.
 
 ### Database (`prisma/schema.prisma`)
 Four models required by Auth.js:
@@ -127,17 +152,31 @@ Four models required by Auth.js:
 - Auto-disconnects in production
 
 ### Middleware (`src/middleware.ts`)
-Protects routes requiring authentication:
-- Runs on every request
-- Attaches session to `context.locals.session`
+Protects routes requiring authentication and handles **both OAuth and custom JWT sessions**:
+- Runs on every request before page rendering
+- First checks for auth-astro session (OAuth logins)
+- If no OAuth session, checks for custom `auth-token` cookie
+- Verifies JWT using jose library with AUTH_SECRET
+- Creates session object from JWT payload
+- Attaches session to `context.locals.session` for use in pages
 - Redirects unauthenticated users from protected routes (`/dashboard`, `/profile`)
-- Protected routes array is easily extensible
+- Protected routes array is easily extensible in constants.ts
+
+**Dual Session Support:**
+The middleware supports both authentication methods seamlessly:
+- **OAuth users**: Session from auth-astro (Google/GitHub)
+- **Email/password users**: Session from custom JWT verification
 
 **Usage in pages:**
 ```typescript
-const session = await getSession(Astro.request);
+// Access session from middleware (works for both auth types)
+const session = Astro.locals.session;
 if (!session) return Astro.redirect('/login');
+const user = session.user;
 ```
+
+**Type Definitions (`src/env.d.ts`):**
+Defines TypeScript types for `Astro.locals.session` to provide IDE autocomplete and type checking.
 
 ### Authentication Pages
 

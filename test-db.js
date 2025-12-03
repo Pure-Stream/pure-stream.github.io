@@ -36,10 +36,24 @@ async function testConnection() {
     const userCount = await prisma.user.count();
     console.log(`✅ Found ${userCount} users in database`);
 
+    // Check all users and their accounts
+    const allUsers = await prisma.user.findMany({
+      include: { accounts: true }
+    });
+
+    console.log('\n📋 All users in database:');
+    console.log(JSON.stringify(allUsers, null, 2));
+
+    // Check all accounts
+    const allAccounts = await prisma.account.findMany();
+    console.log('\n📋 All accounts in database:');
+    console.log(JSON.stringify(allAccounts, null, 2));
+
   } catch (error) {
     console.error('❌ Database connection failed:', error.message);
   } finally {
     await prisma.$disconnect();
+    await pool.end();
   }
 }
 
