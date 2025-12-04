@@ -2,6 +2,17 @@ import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { db } from "./db";
 
+// Helper function to transform account from schema field names back to better-auth field names
+function transformAccountFromDb(account: any) {
+  if (!account) return account;
+  return {
+    ...account,
+    providerId: account.provider,
+    accountId: account.providerAccountId,
+    // Remove the schema field names since better-auth expects the transformed names
+  };
+}
+
 // Create a wrapper around the Prisma client to fix schema mismatches
 const wrappedDb = {
   ...db,
@@ -92,8 +103,6 @@ const wrappedDb = {
   account: {
     ...db.account,
     create: (args: any) => {
-      console.log('🔐 Creating account with data:', JSON.stringify(args.data, null, 2));
-
       // Map better-auth field names to Prisma schema
       if (args.data.providerId) {
         args.data.provider = args.data.providerId;
@@ -107,7 +116,6 @@ const wrappedDb = {
       // Keep password field for credential accounts - better-auth stores credentials in Account table
       // For non-credential accounts, password should not be present
       if (args.data.password && args.data.provider !== 'credential') {
-        console.log('⚠️ Removing password field from non-credential account');
         delete args.data.password;
       }
       // createdAt and updatedAt are handled automatically by Prisma
@@ -131,20 +139,57 @@ const wrappedDb = {
         args.data.type = 'oauth';
       }
 
-      console.log('🔐 Saving account with processed data:', JSON.stringify(args.data, null, 2));
-      return db.account.create(args).then((result: any) => {
-        console.log('✅ Account created successfully:', result.id);
-        return result;
-      }).catch((error: any) => {
+      return db.account.create(args).catch((error: any) => {
         console.error('❌ Failed to create account:', error);
         throw error;
       });
     },
     findUnique: (args: any) => {
-      return db.account.findUnique(args);
+      // Map better-auth field names in where clause
+      if (args.where?.providerId) {
+        args.where.provider = args.where.providerId;
+        delete args.where.providerId;
+      }
+      if (args.where?.accountId) {
+        args.where.providerAccountId = args.where.accountId;
+        delete args.where.accountId;
+      }
+      return db.account.findUnique(args).then((result: any) => {
+        // Transform field names back for better-auth
+        return transformAccountFromDb(result);
+      });
     },
     findMany: (args: any) => {
-      return db.account.findMany(args);
+      // Map better-auth field names in where clause
+      if (args.where) {
+        if (args.where.providerId) {
+          args.where.provider = args.where.providerId;
+          delete args.where.providerId;
+        }
+        if (args.where.accountId) {
+          args.where.providerAccountId = args.where.accountId;
+          delete args.where.accountId;
+        }
+        // Handle nested conditions
+        if (args.where.AND) {
+          args.where.AND = args.where.AND.map((condition: any) => {
+            if (condition.providerId) {
+              condition.provider = condition.providerId;
+              delete condition.providerId;
+            }
+            if (condition.accountId) {
+              condition.providerAccountId = condition.accountId;
+              delete condition.accountId;
+            }
+            return condition;
+          });
+        }
+      }
+
+      return db.account.findMany(args).then((results: any[]) => {
+        // Transform field names back for better-auth
+        return results.map(transformAccountFromDb);
+      });
     }
   }
 };
