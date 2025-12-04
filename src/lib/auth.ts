@@ -13,6 +13,17 @@ function transformAccountFromDb(account: any) {
   };
 }
 
+// Helper function to transform session from schema field names back to better-auth field names
+function transformSessionFromDb(session: any) {
+  if (!session) return session;
+  return {
+    ...session,
+    token: session.sessionToken,
+    expiresAt: session.expires,
+    // Remove the schema field names since better-auth expects the transformed names
+  };
+}
+
 // Create a wrapper around the Prisma client to fix schema mismatches
 const wrappedDb = {
   ...db,
@@ -78,20 +89,64 @@ const wrappedDb = {
       console.log('💾 Saving session with processed data:', JSON.stringify(args.data, null, 2));
       return db.session.create(args).then((result: any) => {
         console.log('✅ Session created successfully:', result.id);
-        return result;
+        // Transform field names back for better-auth
+        return transformSessionFromDb(result);
       }).catch((error: any) => {
         console.error('❌ Failed to create session:', error);
         throw error;
       });
     },
     findUnique: (args: any) => {
-      return db.session.findUnique(args);
+      // Map better-auth field names in where clause
+      if (args.where?.token) {
+        args.where.sessionToken = args.where.token;
+        delete args.where.token;
+      }
+      if (args.where?.expiresAt) {
+        args.where.expires = args.where.expiresAt;
+        delete args.where.expiresAt;
+      }
+      return db.session.findUnique(args).then((result: any) => {
+        // Transform field names back for better-auth
+        return transformSessionFromDb(result);
+      });
     },
     findMany: (args: any) => {
-      return db.session.findMany(args);
+      // Map better-auth field names in where clause
+      if (args.where) {
+        if (args.where.token) {
+          args.where.sessionToken = args.where.token;
+          delete args.where.token;
+        }
+        if (args.where.expiresAt) {
+          args.where.expires = args.where.expiresAt;
+          delete args.where.expiresAt;
+        }
+      }
+      return db.session.findMany(args).then((results: any[]) => {
+        // Transform field names back for better-auth
+        return results.map(transformSessionFromDb);
+      });
     },
     update: (args: any) => {
-      return db.session.update(args);
+      // Map better-auth field names in data
+      if (args.data?.token && !args.data?.sessionToken) {
+        args.data.sessionToken = args.data.token;
+        delete args.data.token;
+      }
+      if (args.data?.expiresAt && !args.data?.expires) {
+        args.data.expires = args.data.expiresAt;
+        delete args.data.expiresAt;
+      }
+      // Map in where clause
+      if (args.where?.token) {
+        args.where.sessionToken = args.where.token;
+        delete args.where.token;
+      }
+      return db.session.update(args).then((result: any) => {
+        // Transform field names back for better-auth
+        return transformSessionFromDb(result);
+      });
     },
     delete: (args: any) => {
       return db.session.delete(args);
