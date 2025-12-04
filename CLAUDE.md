@@ -83,49 +83,86 @@ All pages import and use `src/layouts/Layout.astro` which provides:
 ## Authentication System
 
 ### Overview
-Complete authentication system built with **custom JWT authentication**, **Prisma ORM**, **bcryptjs**, and **jose** (JWT library).
+
+Complete authentication system built with **better-auth**, **Prisma ORM**, and **bcryptjs**.
 
 **Supported Authentication Methods:**
-1. **Email/Password** - Custom JWT-based authentication (fully working)
-2. **Google OAuth** - Sign in with Google account (configured via auth.config.ts)
-3. **GitHub OAuth** - Sign in with GitHub account (configured via auth.config.ts)
 
-**Important Architecture Note:**
-Due to compatibility issues with auth-astro's Credentials provider in Astro's SSR environment, we implemented a **custom JWT-based authentication system** that bypasses auth-astro for email/password logins while maintaining compatibility with OAuth providers.
+1. **Email/Password** - Credential-based authentication via better-auth (fully working)
+2. **Google OAuth** - Sign in with Google account
+3. **GitHub OAuth** - Sign in with GitHub account
 
-### Custom Authentication Implementation
+### Better-Auth Architecture
 
-#### Custom Signin Endpoint (`src/pages/api/auth/signin-custom.ts`)
-Handles email/password authentication:
-1. **Validates credentials**: Checks email and password are provided
-2. **Finds user**: Queries database for user by email
-3. **Verifies password**: Uses bcrypt.compare to validate password hash
-4. **Creates JWT**: Signs JWT token with user data using jose library
-5. **Sets cookie**: Creates HTTP-only `auth-token` cookie with 30-day expiration
-6. **Returns JSON**: Success response with user data (no password)
+#### Authentication Flow
+
+1. **Signup** (`/api/auth/sign-up/email`): Creates user account with hashed password
+2. **Signin** (`/api/auth/sign-in/email`): Validates credentials and creates session
+3. **Session Management**: HTTP-only cookies store `better-auth.session_token`
+4. **Middleware Protection**: Validates session on protected routes
+
+#### Field Name Mapping
+
+**Schema Field Mismatch Issue:**
+The Prisma schema uses field names that differ from better-auth's expected field names. To bridge this mismatch, we implemented transformation functions in `src/lib/auth.ts`:
+
+**Account Field Transformations** (`transformAccountFromDb()`):
+
+- Database: `provider` → better-auth: `providerId`
+- Database: `providerAccountId` → better-auth: `accountId`
+- Applied on account reads (findUnique, findMany)
+
+**Session Field Transformations** (`transformSessionFromDb()`):
+
+- Database: `sessionToken` → better-auth: `token`
+- Database: `expires` → better-auth: `expiresAt`
+- Applied on session reads and creates
+
+**Transformation Benefits:**
+
+- Better-auth receives data with expected field names
+- Proper session cookie generation: `better-auth.session_token=xxxxx`
+- Credential account recognition during signin
+- Seamless session validation in middleware
+
+#### Prisma Adapter Wrapper
+
+The `src/lib/auth.ts` file wraps the Prisma client to:
+
+1. Map better-auth field names → schema field names (on write)
+2. Transform data back to better-auth field names (on read)
+3. Handle field exclusions and transformations for each model:
+   - **User**: Converts `emailVerified: false` → `null`
+   - **Session**: Maps token and expiration field names
+   - **Account**: Maps provider and credential fields
 
 **Security Features:**
-- JWT signed with AUTH_SECRET from environment
+
+- Passwords hashed with bcrypt (10 salt rounds)
 - HTTP-only cookies prevent XSS attacks
 - Secure flag enabled in production
-- 30-day token expiration
-- bcrypt password hashing with 10 salt rounds
+- 30-day session expiration
+- CSRF protection built into better-auth
+- SQL injection protected via Prisma ORM
 
 **Dependencies:**
-- `jose`: Modern JWT library for signing and verifying tokens
+
+- `better-auth`: Modern authentication library
 - `bcryptjs`: Password hashing and verification
 - `@prisma/client`: Database ORM
 - `@prisma/adapter-pg`: PostgreSQL adapter for Prisma 7
 - `pg`: Node.js PostgreSQL client
 
-### Configuration (`auth.config.ts`)
-Defines OAuth providers and session callbacks:
-- **Providers**: Google and GitHub OAuth (Credentials provider present but unused)
-- **JWT Strategy**: Uses JWT sessions for OAuth (not database sessions)
-- **Session callbacks**: Attaches user ID to session from token
-- **Custom pages**: Redirects to `/login` for sign-in
+### Configuration (`src/lib/auth.ts`)
 
-**Note:** The Credentials provider in auth.config.ts is not actively used due to compatibility issues with auth-astro in Astro's middleware bundling. Email/password authentication uses the custom signin endpoint instead.
+Main authentication configuration with:
+
+- **Email/Password Provider**: Enabled with `emailAndPassword: { enabled: true }`
+- **OAuth Providers**: Google and GitHub (configured via environment variables)
+- **Session**: 30-day expiration with automatic renewal
+- **Trusted Origins**: Localhost for development
+
+The wrapper pattern allows using better-auth while maintaining the existing Prisma schema.
 
 ### Database (`prisma/schema.prisma`)
 Four models required by Auth.js:
@@ -152,36 +189,40 @@ Four models required by Auth.js:
 - Auto-disconnects in production
 
 ### Middleware (`src/middleware.ts`)
-Protects routes requiring authentication and handles **both OAuth and custom JWT sessions**:
+
+Protects routes requiring authentication using better-auth sessions:
+
 - Runs on every request before page rendering
-- First checks for auth-astro session (OAuth logins)
-- If no OAuth session, checks for custom `auth-token` cookie
-- Verifies JWT using jose library with AUTH_SECRET
-- Creates session object from JWT payload
+- Checks for better-auth session via `auth.api.getSession()`
+- Reads session from `better-auth.session_token` cookie
 - Attaches session to `context.locals.session` for use in pages
 - Redirects unauthenticated users from protected routes (`/dashboard`, `/profile`)
-- Protected routes array is easily extensible in constants.ts
+- Works seamlessly with both email/password and OAuth logins
 
-**Dual Session Support:**
-The middleware supports both authentication methods seamlessly:
-- **OAuth users**: Session from auth-astro (Google/GitHub)
-- **Email/password users**: Session from custom JWT verification
+**Session Validation:**
 
-**Usage in pages:**
 ```typescript
-// Access session from middleware (works for both auth types)
+// In middleware
+const session = await auth.api.getSession({
+  headers: context.request.headers
+});
+
+// In pages
 const session = Astro.locals.session;
 if (!session) return Astro.redirect('/login');
 const user = session.user;
 ```
 
 **Type Definitions (`src/env.d.ts`):**
+
 Defines TypeScript types for `Astro.locals.session` to provide IDE autocomplete and type checking.
 
 ### Authentication Pages
 
 #### Login Page (`src/pages/login.astro`)
+
 Beautiful, responsive login UI with:
+
 - **OAuth buttons**: Google and GitHub with brand colors/logos
 - **Email/Password form**: Standard credentials input
 - **Divider**: "Or continue with email" separator
@@ -190,9 +231,16 @@ Beautiful, responsive login UI with:
 - **Server-rendered**: `export const prerender = false`
 
 **Form Actions:**
-- Google: `POST /api/auth/signin/google`
-- GitHub: `POST /api/auth/signin/github`
-- Credentials: `POST /api/auth/callback/credentials`
+
+- Google: Uses `authClient.signIn.social({ provider: 'google' })`
+- GitHub: Uses `authClient.signIn.social({ provider: 'github' })`
+- Email/Password: Uses `authClient.signIn.email({ email, password })`
+
+**After Signin:**
+
+- Session cookie is automatically set
+- Client redirects to `/dashboard` on success
+- Middleware validates session on protected routes
 
 #### Signup Page (`src/pages/signup.astro`)
 User registration with client-side validation:
@@ -244,10 +292,12 @@ Handles new user creation:
 - Email uniqueness enforced at DB level
 
 ### Session Management
-Handled automatically by Auth.js:
-- **JWT tokens**: Stored in HTTP-only cookies
-- **Session duration**: Configurable in auth.config.ts
-- **Automatic refresh**: Token renewed on activity
+
+Handled automatically by better-auth:
+
+- **Session tokens**: Stored in HTTP-only `better-auth.session_token` cookie
+- **Session duration**: 30-day expiration configured in `src/lib/auth.ts`
+- **Automatic refresh**: Session renewed on activity
 - **Secure cookies**: HTTPS required in production
 
 ### Security Features
@@ -340,11 +390,12 @@ Example: Creating a new issue:
 - Extends Astro's strict TypeScript config
 - JSX support configured for React (future-proofing)
 
-### `auth.config.ts`
-- Auth.js provider configuration (Google, GitHub, Credentials)
-- Custom authorize function for email/password validation
-- JWT and session callbacks for user ID attachment
-- Custom sign-in page path: `/login`
+### `src/lib/auth.ts`
+
+- Better-auth provider configuration (Google, GitHub, email/password)
+- Prisma adapter wrapper with field name transformations
+- Session configuration with 30-day expiration
+- Trusted origins for development and production
 
 ### `prisma/schema.prisma`
 - Database schema with Auth.js-required models
@@ -373,14 +424,31 @@ Example: Creating a new issue:
 4. Add `export const prerender = false` if page needs server-side rendering (e.g., for sessions)
 
 ### Adding Protected Routes
+
 1. Create page in `src/pages/` (e.g., `profile.astro`)
 2. Add `export const prerender = false` for SSR
 3. Add route path to `protectedRoutes` array in `src/middleware.ts`
 4. Add session check in page frontmatter:
    ```typescript
-   const session = await getSession(Astro.request);
+   const session = Astro.locals.session;
    if (!session) return Astro.redirect('/login');
    ```
+
+### Testing Authentication
+
+Test scripts are organized in the `tests/` folder:
+
+- `tests/test-db.js` - Database connectivity and schema validation
+- `tests/test-users.js` - User management operations
+- `tests/test-password.js` - Password hashing and verification
+
+**Running Tests:**
+
+```bash
+node tests/test-db.js      # Test database connection
+node tests/test-users.js   # Test user CRUD operations
+node tests/test-password.js # Test password functions
+```
 
 ### Working with Database
 **Using Prisma Client:**
@@ -403,12 +471,25 @@ await db.user.update({ where: { id }, data: { name: 'New Name' } });
 3. Run `npx prisma generate` to update client
 
 ### Adding OAuth Providers
-1. Install provider package (if needed): `npm install @auth/core`
-2. Import provider in `auth.config.ts`: `import Provider from '@auth/core/providers/provider'`
-3. Add to providers array with client ID/secret
-4. Add credentials to `.env` and `.env.example`
-5. Update login/signup pages with new OAuth button
-6. Configure OAuth app redirect URI: `http://localhost:4321/api/auth/callback/provider`
+
+1. Add provider configuration in `src/lib/auth.ts` under `socialProviders`
+2. Add environment variables to `.env` and `.env.example`:
+   - `PROVIDER_CLIENT_ID`
+   - `PROVIDER_CLIENT_SECRET`
+3. Update login/signup pages with new OAuth button
+4. Configure OAuth app redirect URI: `http://localhost:4321/api/auth/callback/provider`
+5. Better-auth automatically handles the callback and session creation
+
+**Example Provider Addition:**
+
+```typescript
+// In src/lib/auth.ts
+socialProviders: {
+  google: { ... },
+  github: { ... },
+  // Add new provider here with clientId and clientSecret
+}
+```
 
 ### Working with Feedback Page JavaScript
 **Important**: The feedback page uses inline JavaScript (`<script is:inline>`) to avoid Astro's bundling.
