@@ -1,12 +1,18 @@
 import { defineMiddleware } from 'astro:middleware';
-import { getSession } from 'auth-astro/server';
+import { auth } from './lib/auth';
 import { PROTECTED_ROUTES, ROUTES } from './config/constants';
 
 export const onRequest = defineMiddleware(async (context, next) => {
-  const session = await getSession(context.request);
+  // Get session from better-auth
+  const session = await auth.api.getSession({
+    headers: context.request.headers
+  });
 
   // Attach session to locals so it's available in pages
-  context.locals.session = session;
+  context.locals.session = session ? {
+    user: session.user,
+    session: session.session
+  } : null;
 
   // Protect authenticated routes
   const isProtectedRoute = PROTECTED_ROUTES.some(route =>

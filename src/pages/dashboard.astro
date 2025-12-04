@@ -1,12 +1,12 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Navigation from '../components/Navigation.astro';
-import { getSession } from 'auth-astro/server';
 import { ROUTES } from '../config/constants';
 
 export const prerender = false;
 
-const session = await getSession(Astro.request);
+// Get session from middleware (supports both auth-astro and custom JWT)
+const session = Astro.locals.session;
 
 // This should be protected by middleware, but double-check
 if (!session) {

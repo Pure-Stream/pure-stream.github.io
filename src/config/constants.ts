@@ -23,7 +23,7 @@ export const API_ROUTES = {
   SIGNOUT: '/api/auth/signout',
   GOOGLE_SIGNIN: '/api/auth/signin/google',
   GITHUB_SIGNIN: '/api/auth/signin/github',
-  CALLBACK_CREDENTIALS: '/api/auth/callback/credentials',
+  CALLBACK_CREDENTIALS: '/api/auth/signin/credentials',
 } as const;
 
 // Protected routes that require authentication

@@ -1,11 +1,10 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Navigation from '../components/Navigation.astro';
-import { getSession } from 'auth-astro/server';
 
 export const prerender = false; // Need server-side rendering for session
 
-const session = await getSession(Astro.request);
+const session = Astro.locals.session;
 ---
 
 <Layout title="StudyBible - Native Bible Study Application">

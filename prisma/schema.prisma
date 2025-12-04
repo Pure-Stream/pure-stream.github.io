@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
 }
 
 // User model for authentication
@@ -31,6 +31,7 @@ model Account {
   type              String
   provider          String
   providerAccountId String
+  password          String?  // Stores hashed password for credential accounts
   refresh_token     String?
   access_token      String?
   expires_at        Int?

@@ -1,13 +1,11 @@
 ---
-import { getSession } from 'auth-astro/server';
-
 interface Props {
   currentPage?: 'home' | 'feedback' | 'dashboard';
   showThemeToggle?: boolean;
 }
 
 const { currentPage = 'home', showThemeToggle = true } = Astro.props;
-const session = await getSession(Astro.request);
+const session = Astro.locals.session;
 const user = session?.user;
 ---
 
@@ -48,14 +46,13 @@ const user = session?.user;
             <span class="text-slate-700 dark:text-slate-300 text-sm hidden sm:inline">
               Hi, {user?.name || user?.email}
             </span>
-            <form method="post" action="/api/auth/signout">
-              <button
-                type="submit"
-                class="px-4 py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition-colors"
-              >
-                Logout
-              </button>
-            </form>
+            <button
+              id="logout-button"
+              type="button"
+              class="px-4 py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition-colors"
+            >
+              Logout
+            </button>
           </>
         ) : (
           <!-- Home/Feedback Navigation -->
@@ -118,6 +115,30 @@ const user = session?.user;
     </div>
   </div>
 </nav>
+
+<script>
+  import { authClient } from '../lib/auth-client';
+
+  // Handle logout
+  const logoutButton = document.getElementById('logout-button');
+  if (logoutButton) {
+    logoutButton.addEventListener('click', async () => {
+      try {
+        await authClient.signOut({
+          fetchOptions: {
+            onSuccess: () => {
+              window.location.href = '/';
+            }
+          }
+        });
+      } catch (error) {
+        console.error('Logout error:', error);
+        // Redirect anyway to clear client state
+        window.location.href = '/';
+      }
+    });
+  }
+</script>
 
 {showThemeToggle && (
   <script>
