@@ -54,7 +54,7 @@ export const APP_CONFIG = {
 export const APP_STATS = {
   TRANSLATIONS: '1000+',
   LANGUAGES: '100+',
-  PLATFORMS: '4',
+  PLATFORMS: '5',
 } as const;
 
 // Supported platforms
@@ -63,6 +63,7 @@ export const PLATFORMS = [
   { name: 'macOS', icon: '🍎', requirement: 'macOS 10.15+', status: 'Coming Soon' },
   { name: 'Linux', icon: '🐧', requirement: 'All distributions', status: 'Coming Soon' },
   { name: 'Android', icon: '🤖', requirement: 'Future Release', status: 'Coming Soon' },
+  { name: 'iPhone & iPad', icon: '📱', requirement: 'iOS / iPadOS', status: 'Coming Soon' },
 ] as const;
 
 // Technology stack
