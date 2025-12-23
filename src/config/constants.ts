@@ -42,8 +42,10 @@ export const AUTH_CONFIG = {
 // Application metadata
 export const APP_CONFIG = {
   NAME: 'StudyBible',
-  DESCRIPTION: 'Native Bible study application built with Rust',
-  TAGLINE: '1000+ translations · Parallel view · Fast & offline',
+  DESCRIPTION: 'A modern, fast, and offline Bible study application built with Rust and Dioxus.',
+  TAGLINE: 'Deepen your study with a modern native experience.',
+  VERSION: '0.1.0-alpha',
+  STATUS: 'Coming Soon',
   ICON: '📖',
   GITHUB_URL: 'https://github.com/SujithChristopher/StudyBible',
 } as const;
@@ -51,17 +53,17 @@ export const APP_CONFIG = {
 // Stats displayed on homepage
 export const APP_STATS = {
   TRANSLATIONS: '1000+',
-  BOOKS: '66',
+  LANGUAGES: '100+',
   PLATFORMS: '4',
-  FREE_PERCENTAGE: '100%',
+  LICENSE: 'MIT',
 } as const;
 
 // Supported platforms
 export const PLATFORMS = [
-  { name: 'Windows', icon: '🪟', requirement: 'Windows 10+' },
-  { name: 'macOS', icon: '🍎', requirement: 'macOS 10.15+' },
-  { name: 'Linux', icon: '🐧', requirement: 'All distributions' },
-  { name: 'Android', icon: '🤖', requirement: 'Coming Soon' },
+  { name: 'Windows', icon: '🪟', requirement: 'Windows 10+', status: 'Coming Soon' },
+  { name: 'macOS', icon: '🍎', requirement: 'macOS 10.15+', status: 'Coming Soon' },
+  { name: 'Linux', icon: '🐧', requirement: 'All distributions', status: 'Coming Soon' },
+  { name: 'Android', icon: '🤖', requirement: 'Future Release', status: 'Coming Soon' },
 ] as const;
 
 // Technology stack

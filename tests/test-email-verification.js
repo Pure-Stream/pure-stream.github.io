@@ -12,10 +12,10 @@
 import 'dotenv/config.js';
 import { db } from '../src/lib/db.js';
 
-const TEST_EMAIL = `test-${Date.now()}@example.com`;
+const TEST_EMAIL = 'sujith.christopher52@gmail.com';
 const TEST_PASSWORD = 'TestPassword123!';
 const TEST_NAME = 'Test User';
-const BASE_URL = 'http://localhost:4322'; // Change if dev server is on different port
+const BASE_URL = 'http://localhost:4327'; // Change if dev server is on different port
 
 async function testEmailVerification() {
   try {

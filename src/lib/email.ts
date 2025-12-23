@@ -21,8 +21,10 @@ export const sendVerificationEmail = async (email: string, token: string) => {
   const verificationLink = `${baseUrl}/verify-email?token=${token}`;
 
   try {
+    console.log('🚀 Calling Resend API with from address: onboarding@resend.dev');
+
     const response = await resend.emails.send({
-      from: 'onboarding@resend.dev', // Update this to your domain after verifying with Resend
+      from: 'onboarding@resend.dev', // Resend test email - works for testing
       to: email,
       subject: 'Verify Your Email Address',
       html: `
@@ -106,9 +108,18 @@ export const sendVerificationEmail = async (email: string, token: string) => {
       `,
     });
 
+    console.log('📨 Resend API response:', response);
+
+    if (response.error) {
+      console.error('❌ Resend API error:', response.error);
+      throw new Error(`Resend error: ${JSON.stringify(response.error)}`);
+    }
+
+    console.log('✅ Email sent successfully! ID:', response.data?.id);
     return response;
   } catch (error) {
-    console.error('Failed to send verification email:', error);
+    console.error('❌ Failed to send verification email:', error);
+    console.error('Error details:', error instanceof Error ? error.message : error);
     throw error;
   }
 };

@@ -15,7 +15,7 @@
     "@prisma/adapter-neon": "^7.0.1",
     "@prisma/adapter-pg": "^7.0.1",
     "@prisma/client": "^7.0.0",
-    "astro": "^5.15.9",
+    "astro": "^5.16.6",
     "bcryptjs": "^3.0.3",
     "better-auth": "^1.4.5",
     "jose": "^6.1.3",

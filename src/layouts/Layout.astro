@@ -30,7 +30,7 @@ const { title, description = "StudyBible - A powerful native Bible study applica
       })();
     </script>
   </head>
-  <body class="bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 min-h-screen transition-colors duration-200">
+  <body class="bg-white dark:bg-slate-950 min-h-screen transition-colors duration-300 selection:bg-blue-100 dark:selection:bg-blue-900/40 selection:text-blue-700 dark:selection:text-blue-300">
     <slot />
   </body>
 </html>
@@ -44,11 +44,35 @@ const { title, description = "StudyBible - A powerful native Bible study applica
 
   html {
     scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
   }
 
   body {
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+
+  /* Custom Scrollbar for a more professional look */
+  ::-webkit-scrollbar {
+    width: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-slate-50 dark:bg-slate-900;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-slate-300 dark:bg-slate-700 rounded-full border-4 border-solid border-slate-50 dark:border-slate-900;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-slate-400 dark:bg-slate-600;
+  }
+
+  /* Better Typography */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display tracking-tight;
   }
 </style>
