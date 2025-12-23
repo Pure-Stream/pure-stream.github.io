@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "StudyBible showcase website",
   "type": "module",
+  "license": "UNLICENSED",
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",

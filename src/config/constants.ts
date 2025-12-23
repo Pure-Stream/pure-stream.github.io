@@ -55,7 +55,6 @@ export const APP_STATS = {
   TRANSLATIONS: '1000+',
   LANGUAGES: '100+',
   PLATFORMS: '4',
-  LICENSE: 'MIT',
 } as const;
 
 // Supported platforms
