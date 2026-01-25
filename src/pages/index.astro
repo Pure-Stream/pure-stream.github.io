@@ -72,8 +72,40 @@ const session = Astro.locals.session;
       <div class="absolute -bottom-20 left-1/2 -translate-x-1/2 w-[800px] h-96 bg-indigo-500/10 rounded-full mix-blend-multiply filter blur-[100px] animate-blob animation-delay-4000"></div>
     </section>
 
-    <!-- Features Section -->
-    <section id="features" class="py-24 px-6 relative">
+    <!-- App Showcase Section -->
+    <section class="py-32 px-6 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-950 dark:via-blue-950/30 dark:to-indigo-950/30 overflow-hidden relative">
+      <!-- Decorative Background Elements -->
+      <div class="absolute top-0 left-1/4 w-96 h-96 bg-blue-400/20 rounded-full mix-blend-multiply filter blur-[120px] animate-blob"></div>
+      <div class="absolute bottom-0 right-1/4 w-96 h-96 bg-indigo-400/20 rounded-full mix-blend-multiply filter blur-[120px] animate-blob animation-delay-2000"></div>
+      
+      <div class="max-w-7xl mx-auto relative z-10">
+        <!-- Image Container with Floating Effect -->
+        <div class="relative group">
+          <!-- Glow Effect -->
+          <div class="absolute -inset-4 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-3xl blur-2xl opacity-20 group-hover:opacity-30 transition duration-1000"></div>
+          
+          <!-- Image -->
+          <div class="relative bg-white/50 dark:bg-slate-900/50 backdrop-blur-xl rounded-2xl p-4 md:p-8 shadow-2xl border border-white/20 dark:border-slate-800/50 overflow-hidden">
+            <img 
+              src="/gallery/multi_device.png" 
+              alt="StudyBible app showcased across laptop, tablet, and mobile devices"
+              class="w-full h-auto rounded-xl shadow-lg transform transition-transform duration-700 group-hover:scale-[1.02]"
+              loading="lazy"
+            />
+          </div>
+        </div>
+        
+        <!-- Caption -->
+        <div class="text-center mt-12 max-w-3xl mx-auto">
+          <p class="text-lg md:text-xl text-slate-600 dark:text-slate-300 font-medium leading-relaxed">
+            Experience seamless Bible study across all your devices with a beautiful, native interface
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Designed for Serious Students Section -->
+    <section id="features" class="py-24 px-6 relative bg-white dark:bg-slate-950">
       <div class="max-w-7xl mx-auto relative z-10">
         <div class="text-center mb-20">
           <h2 class="font-display text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-4 tracking-tight">
@@ -98,49 +130,70 @@ const session = Astro.locals.session;
       </div>
     </section>
 
-    <!-- Tech Stack Section -->
-    <section class="py-24 px-6 bg-slate-900 overflow-hidden relative">
-      <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#3b82f6_1px,transparent_1px)] [background-size:40px_40px]"></div>
-      
-      <div class="max-w-7xl mx-auto relative z-10 text-center">
-        <h2 class="font-display text-3xl md:text-4xl font-bold text-white mb-16">Engineered for Performance</h2>
-        
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {TECH_STACK.map(tech => (
-            <div class="flex items-center gap-4 p-6 bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 hover:bg-white/10 transition-all duration-300">
-              <div class={`w-14 h-14 ${tech.bgColor} rounded-xl flex items-center justify-center`}>
-                <span class="text-3xl">{tech.icon === 'Dx' ? <span class="text-lg font-black font-display text-purple-600 dark:text-purple-400">Dx</span> : tech.icon}</span>
-              </div>
-              <div class="text-left">
-                <div class="font-bold text-white text-lg">{tech.name}</div>
-                <div class="text-sm text-slate-400">{tech.description}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-
     <!-- Download/Coming Soon Section -->
     <section id="download" class="py-24 px-6 relative overflow-hidden bg-slate-50 dark:bg-slate-950">
       <div class="max-w-7xl mx-auto relative z-10 text-center">
-        <h2 class="font-display text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-6">Coming to Every Screen</h2>
-        <p class="text-lg text-slate-600 dark:text-slate-400 mb-16 max-w-2xl mx-auto">
-          We're hard at work bringing StudyBible to your favorite platform. 
-          Sign up to be the first to know when we launch.
+        <h2 class="font-display text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-6">Download Now or Get Notified</h2>
+        <p class="text-lg text-slate-600 dark:text-slate-400 mb-8 max-w-2xl mx-auto">
+          We're bringing PureStream's StudyBible to every platform.
         </p>
-
-        <div class="grid grid-cols-2 lg:grid-cols-5 gap-6 max-w-6xl mx-auto mb-16">
-          {PLATFORMS.map(platform => (
-            <div class="relative group p-8 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 hover:shadow-xl transition-all duration-500 hover:-translate-y-1">
-              <div class="absolute top-4 right-4 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-tighter bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800 opacity-0 group-hover:opacity-100 transition-opacity">
-                {platform.status}
-              </div>
-              <div class="text-5xl mb-6 group-hover:scale-110 transition-transform duration-500">{platform.icon}</div>
-              <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-1">{platform.name}</h3>
-              <p class="text-sm text-slate-500 dark:text-slate-400 font-medium">{platform.requirement}</p>
+        
+        <!-- EVALUATION NOTICE - VERY PROMINENT -->
+        <div class="max-w-4xl mx-auto mb-12 p-6 bg-amber-50 dark:bg-amber-900/20 border-4 border-amber-400 dark:border-amber-600 rounded-2xl shadow-xl">
+          <div class="flex items-start gap-4">
+            <span class="text-4xl">⚠️</span>
+            <div class="flex-1">
+              <h3 class="text-xl md:text-2xl font-black text-amber-900 dark:text-amber-200 mb-3">EVALUATION BUILD - NOT FOR PRODUCTION USE</h3>
+              <p class="text-base md:text-lg font-bold text-amber-800 dark:text-amber-300 leading-relaxed">
+                {APP_CONFIG.EVALUATION_NOTICE}
+              </p>
             </div>
-          ))}
+          </div>
+        </div>
+
+        <!-- Available Platforms -->
+        <div class="mb-16">
+          <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-6">Available Now</h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-8">
+            {PLATFORMS.filter(p => p.status === 'Available').map(platform => (
+              <a 
+                href={platform.downloadUrl} 
+                target="_blank"
+                rel="noopener noreferrer"
+                class="relative group p-8 bg-white dark:bg-slate-900 rounded-3xl border-2 border-green-200 dark:border-green-800 hover:shadow-2xl hover:border-green-400 dark:hover:border-green-600 transition-all duration-500 hover:-translate-y-2"
+              >
+                <div class="absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-black uppercase tracking-tight bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-400 border border-green-300 dark:border-green-700">
+                  {platform.status}
+                </div>
+                <div class="text-5xl mb-6 group-hover:scale-110 transition-transform duration-500">{platform.icon}</div>
+                <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">{platform.name}</h3>
+                <p class="text-sm text-slate-500 dark:text-slate-400 font-medium mb-4">{platform.requirement}</p>
+                <div class="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-semibold">
+                  <span>Download</span>
+                  <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                  </svg>
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+
+        <!-- Coming Soon Platforms -->
+        <div class="mb-16">
+          <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-6">Coming Soon</h3>
+          <div class="grid grid-cols-2 lg:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            {PLATFORMS.filter(p => p.status === 'Coming Soon').map(platform => (
+              <div class="relative group p-8 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 hover:shadow-xl transition-all duration-500 hover:-translate-y-1 opacity-75">
+                <div class="absolute top-4 right-4 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-tighter bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
+                  {platform.status}
+                </div>
+                <div class="text-5xl mb-6 group-hover:scale-110 transition-transform duration-500">{platform.icon}</div>
+                <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-1">{platform.name}</h3>
+                <p class="text-sm text-slate-500 dark:text-slate-400 font-medium">{platform.requirement}</p>
+              </div>
+            ))}
+          </div>
         </div>
 
         <!-- Notify Form Placeholder -->
