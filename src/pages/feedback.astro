@@ -34,7 +34,7 @@ const user = Astro.locals.user;
             </svg>
           </button>
 
-          {session ? (
+          {user ? (
             <a href="/dashboard" class="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-lg hover:shadow-lg transition-all text-sm">
               Dashboard
             </a>
