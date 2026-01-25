@@ -1,25 +1,35 @@
 import { defineMiddleware } from 'astro:middleware';
-import { auth } from './lib/auth';
+import { supabase } from './lib/supabase';
 import { PROTECTED_ROUTES, ROUTES } from './config/constants';
 
 export const onRequest = defineMiddleware(async (context, next) => {
-  // Get session from better-auth
-  const session = await auth.api.getSession({
-    headers: context.request.headers
-  });
+  // Get access token from cookies
+  const accessToken = context.cookies.get('sb-access-token')?.value;
+  const refreshToken = context.cookies.get('sb-refresh-token')?.value;
 
-  // Attach session to locals so it's available in pages
-  context.locals.session = session ? {
-    user: session.user,
-    session: session.session
-  } : null;
+  let user = null;
+
+  // If we have tokens, try to get the user
+  if (accessToken) {
+    try {
+      const { data: { user: authUser }, error } = await supabase.auth.getUser(accessToken);
+      if (authUser && !error) {
+        user = authUser;
+      }
+    } catch (err) {
+      console.error('Auth error in middleware:', err);
+    }
+  }
+
+  // Attach user to locals so it's available in pages
+  context.locals.user = user;
 
   // Protect authenticated routes
   const isProtectedRoute = PROTECTED_ROUTES.some(route =>
     context.url.pathname.startsWith(route)
   );
 
-  if (isProtectedRoute && !session) {
+  if (isProtectedRoute && !user) {
     // Redirect to login if not authenticated
     return context.redirect(ROUTES.LOGIN);
   }

@@ -5,7 +5,7 @@ import { APP_CONFIG, FEATURES, PLATFORMS, TECH_STACK, APP_STATS } from '../confi
 
 export const prerender = false;
 
-const session = Astro.locals.session;
+const user = Astro.locals.user;
 ---
 
 <Layout title={`${APP_CONFIG.NAME} - ${APP_CONFIG.TAGLINE}`}>

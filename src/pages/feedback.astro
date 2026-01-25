@@ -3,7 +3,7 @@ import Layout from '../layouts/Layout.astro';
 
 export const prerender = false; // Need server-side rendering for session
 
-const session = Astro.locals.session;
+const user = Astro.locals.user;
 ---
 
 <Layout title="Feedback - PureStream's StudyBible">
@@ -79,7 +79,7 @@ const session = Astro.locals.session;
               <span id="closedCount">2</span> Closed
             </button>
           </div>
-{session ? (
+{user ? (
             <button
               id="newIssueBtn"
               class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors flex items-center gap-2"
@@ -206,7 +206,7 @@ const session = Astro.locals.session;
       </div>
 
       <!-- Info Message -->
-      {!session && (
+      {!user && (
         <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 text-center">
           <p class="text-blue-900 font-medium mb-2">Want to report an issue or suggest a feature?</p>
           <p class="text-blue-700 mb-4">Please log in to create and track your feedback.</p>
@@ -256,81 +256,36 @@ const session = Astro.locals.session;
 </script>
 
 <script is:inline>
-  // Initial data
-  let issues = [
-    {
-      id: 1,
-      title: 'Add verse highlighting feature',
-      description: 'It would be great to highlight important verses in different colors. This would help users mark important passages and organize their study better.',
-      status: 'open',
-      labels: ['enhancement', 'feature'],
-      author: 'user123',
-      comments: [
-        { author: 'dev1', text: 'Great idea! We\'re planning to add this in the next release.', date: '2025-01-16' },
-        { author: 'user456', text: 'Would love to see color customization options!', date: '2025-01-17' }
-      ],
-      createdAt: '2025-01-15',
-    },
-    {
-      id: 2,
-      title: 'Support for more Indian languages',
-      description: 'Please add Hindi, Telugu, and Malayalam translations. These are widely used languages and would help many users.',
-      status: 'open',
-      labels: ['enhancement', 'translations'],
-      author: 'biblelover',
-      comments: [
-        { author: 'admin', text: 'We\'re working on expanding language support!', date: '2025-01-15' }
-      ],
-      createdAt: '2025-01-14',
-    },
-    {
-      id: 3,
-      title: 'Export notes as PDF',
-      description: 'Allow users to export their bookmarks and notes as a PDF document for offline reading or sharing.',
-      status: 'open',
-      labels: ['feature', 'export'],
-      author: 'johnsmith',
-      comments: [],
-      createdAt: '2025-01-13',
-    },
-    {
-      id: 4,
-      title: 'Cross-reference linking',
-      description: 'Add ability to link related verses together for better study connections.',
-      status: 'open',
-      labels: ['enhancement'],
-      author: 'studyenthusiast',
-      comments: [],
-      createdAt: '2025-01-12',
-    },
-    {
-      id: 5,
-      title: 'App crashes on Android 12',
-      description: 'The app force closes when opening on Android 12 devices. Need to investigate compatibility issues.',
-      status: 'closed',
-      labels: ['bug', 'android'],
-      author: 'androiduser',
-      comments: [
-        { author: 'dev1', text: 'Fixed in version 0.1.2', date: '2025-01-14' }
-      ],
-      createdAt: '2025-01-10',
-      closedAt: '2025-01-14',
-    },
-    {
-      id: 6,
-      title: 'Dark mode doesn\'t apply to sidebar',
-      description: 'When enabling dark mode, the sidebar remains in light theme causing inconsistency.',
-      status: 'closed',
-      labels: ['bug', 'ui'],
-      author: 'nightowl',
-      comments: [],
-      createdAt: '2025-01-08',
-      closedAt: '2025-01-11',
-    },
-  ];
-
-  let nextId = 7;
+  // Data
+  let issues = [];
+  let labels = [];
   let selectedLabels = new Set();
+
+  // Load data from API
+  async function loadData() {
+    try {
+      const [feedbackRes, labelsRes] = await Promise.all([
+        fetch('/api/feedback/list'),
+        fetch('/api/feedback/labels/list')
+      ]);
+
+      if (!feedbackRes.ok || !labelsRes.ok) {
+        console.error('Failed to load data');
+        return;
+      }
+
+      const feedbackData = await feedbackRes.json();
+      const labelsData = await labelsRes.json();
+
+      issues = feedbackData.data || [];
+      labels = labelsData.data || [];
+
+      renderIssues();
+      updateLabelButtons();
+    } catch (error) {
+      console.error('Error loading data:', error);
+    }
+  }
 
   // Render functions
   function renderIssues() {
@@ -524,22 +479,38 @@ const session = Astro.locals.session;
     });
   });
 
-  // Label selection
-  document.querySelectorAll('.label-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const label = btn.getAttribute('data-label');
-      if (label && selectedLabels.has(label)) {
-        selectedLabels.delete(label);
-        btn.classList.remove('bg-blue-100', 'border-blue-500', 'text-blue-700');
-      } else if (label) {
-        selectedLabels.add(label);
-        btn.classList.add('bg-blue-100', 'border-blue-500', 'text-blue-700');
-      }
+  // Update label buttons when labels are loaded
+  function updateLabelButtons() {
+    // Create a map of label names to IDs for quick lookup
+    const labelMap = {};
+    labels.forEach(label => {
+      labelMap[label.name] = label.id;
     });
-  });
+
+    // Update all label buttons with the correct IDs
+    document.querySelectorAll('.label-btn').forEach(btn => {
+      const labelName = btn.getAttribute('data-label');
+      const labelId = labelMap[labelName];
+      if (labelId) {
+        btn.setAttribute('data-label-id', labelId);
+      }
+
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const labelId = btn.getAttribute('data-label-id');
+        if (labelId && selectedLabels.has(labelId)) {
+          selectedLabels.delete(labelId);
+          btn.classList.remove('bg-blue-100', 'border-blue-500', 'text-blue-700');
+        } else if (labelId) {
+          selectedLabels.add(labelId);
+          btn.classList.add('bg-blue-100', 'border-blue-500', 'text-blue-700');
+        }
+      });
+    });
+  }
 
   // Form submission
-  issueForm?.addEventListener('submit', (e) => {
+  issueForm?.addEventListener('submit', async (e) => {
     e.preventDefault();
 
     const titleEl = document.getElementById('issueTitle');
@@ -550,29 +521,38 @@ const session = Astro.locals.session;
     const title = titleEl.value;
     const description = descriptionEl.value;
 
-    const newIssue = {
-      id: nextId++,
-      title,
-      description,
-      status: 'open',
-      labels: Array.from(selectedLabels),
-      author: 'You',
-      comments: [],
-      createdAt: new Date().toISOString().split('T')[0],
-    };
+    try {
+      const response = await fetch('/api/feedback/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title,
+          description,
+          labelIds: Array.from(selectedLabels)
+        })
+      });
 
-    issues.unshift(newIssue);
-    renderIssues();
+      if (!response.ok) {
+        const error = await response.json();
+        alert(error.error || 'Failed to create issue');
+        return;
+      }
 
-    newIssueForm?.classList.add('hidden');
-    if (issueForm && issueForm.reset) issueForm.reset();
-    selectedLabels.clear();
-    document.querySelectorAll('.label-btn').forEach(btn => {
-      btn.classList.remove('bg-blue-100', 'border-blue-500', 'text-blue-700');
-    });
+      // Reload data and clear form
+      await loadData();
+      newIssueForm?.classList.add('hidden');
+      if (issueForm && issueForm.reset) issueForm.reset();
+      selectedLabels.clear();
+      document.querySelectorAll('.label-btn').forEach(btn => {
+        btn.classList.remove('bg-blue-100', 'border-blue-500', 'text-blue-700');
+      });
 
-    // Show success message
-    alert('Issue created successfully!');
+      // Show success message
+      alert('Issue created successfully!');
+    } catch (error) {
+      console.error('Error creating issue:', error);
+      alert('An error occurred. Please try again.');
+    }
   });
 
   // Close modal
@@ -583,8 +563,8 @@ const session = Astro.locals.session;
     }
   });
 
-  // Initial render
-  renderIssues();
+  // Load data on page load
+  document.addEventListener('DOMContentLoaded', loadData);
 </script>
 
 <style>

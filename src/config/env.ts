@@ -7,12 +7,8 @@
  * Required environment variables for the application
  */
 const REQUIRED_ENV_VARS = [
-  'AUTH_SECRET',
-  'GOOGLE_CLIENT_ID',
-  'GOOGLE_CLIENT_SECRET',
-  'GITHUB_CLIENT_ID',
-  'GITHUB_CLIENT_SECRET',
-  'DATABASE_URL',
+  'SUPABASE_URL',
+  'SUPABASE_ANON_KEY',
 ] as const;
 
 /**

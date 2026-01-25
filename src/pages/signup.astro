@@ -125,7 +125,11 @@ export const prerender = false; // This page needs to be server-rendered for aut
 </Layout>
 
 <script>
-  import { authClient } from '../lib/auth-client';
+  import { createClient } from '@supabase/supabase-js';
+
+  const supabaseUrl = import.meta.env.SUPABASE_URL;
+  const supabaseAnonKey = import.meta.env.SUPABASE_ANON_KEY;
+  const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
   // Handle email/password signup
   const signupForm = document.getElementById('signupForm');
@@ -149,16 +153,19 @@ export const prerender = false; // This page needs to be server-rendered for aut
       }
 
       try {
-        const response = await authClient.signUp.email({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
-          name,
-          callbackURL: '/dashboard',
+          options: {
+            data: {
+              name: name
+            }
+          }
         });
 
-        if (response.error) {
-          alert(response.error.message || 'Failed to create account');
-        } else {
+        if (error) {
+          alert(error.message || 'Failed to create account');
+        } else if (data.user) {
           // Redirect to check-email page on success
           window.location.href = '/check-email?email=' + encodeURIComponent(email);
         }

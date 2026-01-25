@@ -100,7 +100,11 @@ export const prerender = false; // This page needs to be server-rendered for aut
 </Layout>
 
 <script>
-  import { authClient } from '../lib/auth-client';
+  import { createClient } from '@supabase/supabase-js';
+
+  const supabaseUrl = import.meta.env.SUPABASE_URL;
+  const supabaseAnonKey = import.meta.env.SUPABASE_ANON_KEY;
+  const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
   // Handle email/password signin
   document.getElementById('credentials-form')?.addEventListener('submit', async (e) => {
@@ -118,18 +122,17 @@ export const prerender = false; // This page needs to be server-rendered for aut
     errorDiv.classList.add('hidden');
 
     try {
-      const response = await authClient.signIn.email({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
-        callbackURL: '/dashboard',
       });
 
-      if (response.error) {
-        errorDiv.textContent = response.error.message || 'Invalid email or password';
+      if (error) {
+        errorDiv.textContent = error.message || 'Invalid email or password';
         errorDiv.classList.remove('hidden');
         button.disabled = false;
         button.textContent = 'Sign In';
-      } else {
+      } else if (data.session) {
         // Redirect to dashboard on success
         window.location.href = '/dashboard';
       }
