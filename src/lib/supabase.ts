@@ -24,20 +24,18 @@ export const createServerSupabaseClient = (context: AstroGlobal) => {
   return createServerClient(supabaseUrl, supabaseAnonKey, {
     cookies: {
       getAll() {
-        // Get all cookies from the request
+        // Get Supabase auth cookies directly from Astro's cookie API
         const cookies: { name: string; value: string }[] = [];
-        const cookieHeader = context.request.headers.get('cookie') || '';
 
-        // Parse cookie header string
-        cookieHeader.split(';').forEach(cookie => {
-          const [name, value] = cookie.trim().split('=');
-          if (name && value) {
-            cookies.push({
-              name: name.trim(),
-              value: decodeURIComponent(value.trim()),
-            });
-          }
-        });
+        const accessToken = context.cookies.get('sb-access-token')?.value;
+        if (accessToken) {
+          cookies.push({ name: 'sb-access-token', value: accessToken });
+        }
+
+        const refreshToken = context.cookies.get('sb-refresh-token')?.value;
+        if (refreshToken) {
+          cookies.push({ name: 'sb-refresh-token', value: refreshToken });
+        }
 
         return cookies;
       },

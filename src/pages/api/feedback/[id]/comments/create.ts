@@ -1,18 +1,32 @@
 import type { APIRoute } from 'astro';
-import { supabase } from '../../../../../lib/supabase';
+import { createServerSupabaseClient } from '../../../../../lib/supabase';
 import { requireAuth, jsonResponse } from '../../../../../lib/api-utils';
 
 export const POST: APIRoute = async (context) => {
   try {
     const user = await requireAuth(context);
+    const supabase = createServerSupabaseClient(context);
     const { text } = await context.request.json();
 
     // Validate
     if (!text || text.trim().length === 0) {
+      console.warn('[Validation Error]', {
+        error: 'Comment text is empty',
+        userId: user.id,
+        feedbackId: context.params.id,
+        path: context.url.pathname
+      });
       return jsonResponse({ error: 'Comment text is required' }, 400);
     }
 
     if (text.length > 2000) {
+      console.warn('[Validation Error]', {
+        error: 'Comment text too long',
+        textLength: text.length,
+        userId: user.id,
+        feedbackId: context.params.id,
+        path: context.url.pathname
+      });
       return jsonResponse({ error: 'Comment text is too long (max 2000 characters)' }, 400);
     }
 
@@ -28,8 +42,28 @@ export const POST: APIRoute = async (context) => {
       .single();
 
     if (error) {
-      return jsonResponse({ error: error.message }, 500);
+      console.error('[Database Error - Create Comment]', {
+        error: error.message,
+        code: error.code,
+        details: error.details,
+        hint: error.hint,
+        feedbackId: context.params.id,
+        userId: user.id,
+        timestamp: new Date().toISOString()
+      });
+
+      return jsonResponse({
+        error: 'Failed to create comment',
+        details: import.meta.env.DEV ? error.message : undefined
+      }, 500);
     }
+
+    console.log('[Comment Created]', {
+      commentId: data.id,
+      feedbackId: context.params.id,
+      userId: user.id,
+      timestamp: new Date().toISOString()
+    });
 
     return jsonResponse({ data }, 201);
   } catch (error) {
