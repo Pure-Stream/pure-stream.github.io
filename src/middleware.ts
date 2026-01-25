@@ -1,24 +1,35 @@
 import { defineMiddleware } from 'astro:middleware';
-import { supabase } from './lib/supabase';
+import { createServerSupabaseClient } from './lib/supabase';
 import { PROTECTED_ROUTES, ROUTES } from './config/constants';
 
 export const onRequest = defineMiddleware(async (context, next) => {
-  // Get access token from cookies
-  const accessToken = context.cookies.get('sb-access-token')?.value;
-  const refreshToken = context.cookies.get('sb-refresh-token')?.value;
+  // Create server-side Supabase client with cookie support
+  const supabase = createServerSupabaseClient(context);
+
+  // Debug logging
+  const pathname = context.url.pathname;
+  console.log(`[Middleware] Path: ${pathname}`);
+
+  // Log cookies received in request
+  const cookieHeader = context.request.headers.get('cookie');
+  console.log(`[Middleware] Cookie header: ${cookieHeader || '(none)'}`);
 
   let user = null;
 
-  // If we have tokens, try to get the user
-  if (accessToken) {
-    try {
-      const { data: { user: authUser }, error } = await supabase.auth.getUser(accessToken);
-      if (authUser && !error) {
-        user = authUser;
+  // Get the session from cookies
+  try {
+    const { data: { session }, error } = await supabase.auth.getSession();
+    if (session && !error) {
+      user = session.user;
+      console.log(`[Middleware] User authenticated: ${user.email}`);
+    } else {
+      console.log(`[Middleware] No session found`);
+      if (error) {
+        console.log(`[Middleware] Session error: ${error.message}`);
       }
-    } catch (err) {
-      console.error('Auth error in middleware:', err);
     }
+  } catch (err) {
+    console.error('[Middleware] Error getting session:', err);
   }
 
   // Attach user to locals so it's available in pages
@@ -30,6 +41,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
   );
 
   if (isProtectedRoute && !user) {
+    console.log(`[Middleware] Protected route without user, redirecting to login`);
     // Redirect to login if not authenticated
     return context.redirect(ROUTES.LOGIN);
   }

@@ -7,8 +7,8 @@
  * Required environment variables for the application
  */
 const REQUIRED_ENV_VARS = [
-  'SUPABASE_URL',
-  'SUPABASE_ANON_KEY',
+  'PUBLIC_SUPABASE_URL',
+  'PUBLIC_SUPABASE_ANON_KEY',
 ] as const;
 
 /**

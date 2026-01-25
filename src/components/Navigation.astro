@@ -178,9 +178,16 @@ const user = Astro.locals.user;
   import { createClient } from '@supabase/supabase-js';
   import { setupThemeToggle } from '../scripts/theme';
 
-  const supabaseUrl = import.meta.env.SUPABASE_URL;
-  const supabaseAnonKey = import.meta.env.SUPABASE_ANON_KEY;
-  const supabase = createClient(supabaseUrl, supabaseAnonKey);
+  const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+  const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+    auth: {
+      flowType: 'pkce',
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: true,
+    },
+  });
 
   // Mobile Menu Logic
   const toggleBtn = document.getElementById('mobile-menu-toggle');
@@ -206,7 +213,16 @@ const user = Astro.locals.user;
   // Handle logout
   const handleLogout = async () => {
     try {
+      // Sign out on client
       await supabase.auth.signOut();
+
+      // Clear server-side cookies
+      try {
+        await fetch('/api/auth/logout', { method: 'POST' });
+      } catch (err) {
+        console.error('Failed to clear server cookies:', err);
+      }
+
       window.location.href = '/';
     } catch (error) {
       console.error('Logout error:', error);

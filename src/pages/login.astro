@@ -102,9 +102,16 @@ export const prerender = false; // This page needs to be server-rendered for aut
 <script>
   import { createClient } from '@supabase/supabase-js';
 
-  const supabaseUrl = import.meta.env.SUPABASE_URL;
-  const supabaseAnonKey = import.meta.env.SUPABASE_ANON_KEY;
-  const supabase = createClient(supabaseUrl, supabaseAnonKey);
+  const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+  const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+    auth: {
+      flowType: 'pkce',
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: true,
+    },
+  });
 
   // Handle email/password signin
   document.getElementById('credentials-form')?.addEventListener('submit', async (e) => {
@@ -122,19 +129,53 @@ export const prerender = false; // This page needs to be server-rendered for aut
     errorDiv.classList.add('hidden');
 
     try {
+      console.log('[Login] Attempting signin with:', email);
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
+      console.log('[Login] Sign in response:', { hasSession: !!data.session, error: error?.message });
+
       if (error) {
+        console.error('[Login] Auth error:', error.message);
         errorDiv.textContent = error.message || 'Invalid email or password';
         errorDiv.classList.remove('hidden');
         button.disabled = false;
         button.textContent = 'Sign In';
       } else if (data.session) {
-        // Redirect to dashboard on success
-        window.location.href = '/dashboard';
+        console.log('[Login] Session created, syncing to server...');
+
+        // Send tokens to server to set cookies
+        try {
+          const response = await fetch('/api/auth/session', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              accessToken: data.session.access_token,
+              refreshToken: data.session.refresh_token,
+            }),
+          });
+
+          const sessionData = await response.json();
+
+          if (response.ok && sessionData.success) {
+            console.log('[Login] Session synced to server, redirecting to /dashboard');
+            window.location.href = '/dashboard';
+          } else {
+            console.log('[Login] Session sync failed:', sessionData.error);
+            errorDiv.textContent = 'Session sync failed. Please try again.';
+            errorDiv.classList.remove('hidden');
+            button.disabled = false;
+            button.textContent = 'Sign In';
+          }
+        } catch (syncError) {
+          console.error('[Login] Session sync error:', syncError);
+          errorDiv.textContent = 'An error occurred. Please try again.';
+          errorDiv.classList.remove('hidden');
+          button.disabled = false;
+          button.textContent = 'Sign In';
+        }
       }
     } catch (error) {
       console.error('Login error:', error);

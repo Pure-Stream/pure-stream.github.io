@@ -127,9 +127,16 @@ export const prerender = false; // This page needs to be server-rendered for aut
 <script>
   import { createClient } from '@supabase/supabase-js';
 
-  const supabaseUrl = import.meta.env.SUPABASE_URL;
-  const supabaseAnonKey = import.meta.env.SUPABASE_ANON_KEY;
-  const supabase = createClient(supabaseUrl, supabaseAnonKey);
+  const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+  const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+    auth: {
+      flowType: 'pkce',
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: true,
+    },
+  });
 
   // Handle email/password signup
   const signupForm = document.getElementById('signupForm');
@@ -166,7 +173,22 @@ export const prerender = false; // This page needs to be server-rendered for aut
         if (error) {
           alert(error.message || 'Failed to create account');
         } else if (data.user) {
-          // Redirect to check-email page on success
+          // If a session was created, sync it to server
+          if (data.session) {
+            try {
+              await fetch('/api/auth/session', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  accessToken: data.session.access_token,
+                  refreshToken: data.session.refresh_token,
+                }),
+              });
+            } catch (err) {
+              console.error('Failed to sync session:', err);
+            }
+          }
+          // Redirect to check-email page
           window.location.href = '/check-email?email=' + encodeURIComponent(email);
         }
       } catch (error) {
