@@ -3,7 +3,7 @@
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Project Overview
-BibleWebsite is a hybrid (SSR + SSG) marketing/showcase website for the StudyBible application (https://github.com/SujithChristopher/StudyBible). Built with Astro 5.15.9 and Tailwind CSS, it features a compact homepage, an interactive GitHub-style feedback system, and a complete authentication system with Google OAuth, GitHub OAuth, and email/password login. The site is designed to be clean, modern, and responsive.
+WordWeb is a hybrid (SSR + SSG) marketing/showcase website for the StudyBible application (https://github.com/SujithChristopher/StudyBible). Built with Astro 5.16.6 and Tailwind CSS, it features a compact homepage, an interactive GitHub-style feedback system, and a complete authentication system powered by Supabase Auth. The site includes real-time feedback tracking and is designed to be clean, modern, and responsive.
 
 ## Development Commands
 
@@ -30,28 +30,32 @@ npm run preview
 This is a hybrid SSR/SSG project with Astro handling both the build process and page routing:
 
 ```
-├── auth.config.ts            # Auth.js configuration (providers, callbacks)
-├── prisma/
-│   ├── schema.prisma         # Database schema (User, Account, Session models)
-│   └── migrations/           # Database migration history
-├── prisma.config.ts          # Prisma 7 configuration (database URL, migrations path)
 ├── src/
 │   ├── lib/
-│   │   └── db.ts            # Prisma client instance (singleton pattern)
-│   ├── middleware.ts        # Route protection middleware
+│   │   ├── supabase.ts          # Supabase client initialization
+│   │   └── api-utils.ts         # API authentication & response helpers
+│   ├── middleware.ts            # Route protection middleware (Supabase Auth)
 │   ├── layouts/
-│   │   └── Layout.astro     # Base layout with meta tags, fonts, global styles
+│   │   └── Layout.astro         # Base layout with meta tags, fonts, global styles
 │   ├── pages/
 │   │   ├── api/
-│   │   │   └── auth/
-│   │   │       └── signup.ts       # User registration API endpoint
-│   │   ├── index.astro             # Homepage (/) - SSR for session
-│   │   ├── feedback.astro          # Feedback/Issues page (/feedback)
-│   │   ├── login.astro             # Login page with OAuth & credentials
-│   │   ├── signup.astro            # User registration page
-│   │   └── dashboard.astro         # Protected user dashboard
-│   └── components/                 # (Empty - for future reusable components)
-└── .env                            # Environment variables (gitignored)
+│   │   │   └── feedback/
+│   │   │       ├── list.ts                 # List all feedback
+│   │   │       ├── create.ts               # Create new feedback
+│   │   │       ├── [id].ts                 # Get feedback details
+│   │   │       ├── [id]/comments/create.ts # Create comment on feedback
+│   │   │       └── labels/list.ts          # List available labels
+│   │   ├── index.astro          # Homepage (/) - SSR for session
+│   │   ├── feedback.astro       # Feedback/Issues page (/feedback) - real-time data
+│   │   ├── login.astro          # Login page (Supabase Auth)
+│   │   ├── signup.astro         # User registration page (Supabase Auth)
+│   │   ├── dashboard.astro      # Protected user dashboard
+│   │   └── check-email.astro    # Email verification confirmation page
+│   ├── components/
+│   │   └── Navigation.astro     # Main navigation with auth state
+│   └── config/
+│       └── constants.ts         # App configuration & routes
+└── .env                         # Environment variables (gitignored)
 ```
 
 ### Page Routing
@@ -84,138 +88,120 @@ All pages import and use `src/layouts/Layout.astro` which provides:
 
 ### Overview
 
-Complete authentication system built with **better-auth**, **Prisma ORM**, and **bcryptjs**.
+Complete authentication system built with **Supabase Auth** and **PostgreSQL**.
 
 **Supported Authentication Methods:**
 
-1. **Email/Password** - Credential-based authentication via better-auth (fully working)
-2. **Google OAuth** - Sign in with Google account
-3. **GitHub OAuth** - Sign in with GitHub account
+1. **Email/Password** - Credential-based authentication via Supabase (fully working)
+2. **Google OAuth** - Sign in with Google account (optional, requires configuration)
+3. **GitHub OAuth** - Sign in with GitHub account (optional, requires configuration)
 
-### Better-Auth Architecture
+### Supabase Auth Architecture
 
 #### Authentication Flow
 
-1. **Signup** (`/api/auth/sign-up/email`): Creates user account with hashed password
-2. **Signin** (`/api/auth/sign-in/email`): Validates credentials and creates session
-3. **Session Management**: HTTP-only cookies store `better-auth.session_token`
+1. **Signup**: `supabase.auth.signUp()` creates user account with email and password
+2. **Signin**: `supabase.auth.signInWithPassword()` validates credentials and creates session
+3. **Session Management**: HTTP-only cookies store `sb-access-token` and `sb-refresh-token`
 4. **Middleware Protection**: Validates session on protected routes
+5. **Logout**: `supabase.auth.signOut()` clears session
 
-#### Field Name Mapping
+#### Key Features
 
-**Schema Field Mismatch Issue:**
-The Prisma schema uses field names that differ from better-auth's expected field names. To bridge this mismatch, we implemented transformation functions in `src/lib/auth.ts`:
+- **Automatic Token Management**: Supabase handles token refresh automatically
+- **Email Verification**: Built-in email verification system (configurable in Supabase dashboard)
+- **User Metadata**: Store user info (name, avatar) in `user_metadata` field
+- **Row-Level Security**: Database-level access control via RLS policies
+- **PKCE Flow**: Secure OAuth flow for browser-based authentication
 
-**Account Field Transformations** (`transformAccountFromDb()`):
+#### Supabase Client (`src/lib/supabase.ts`)
 
-- Database: `provider` → better-auth: `providerId`
-- Database: `providerAccountId` → better-auth: `accountId`
-- Applied on account reads (findUnique, findMany)
-
-**Session Field Transformations** (`transformSessionFromDb()`):
-
-- Database: `sessionToken` → better-auth: `token`
-- Database: `expires` → better-auth: `expiresAt`
-- Applied on session reads and creates
-
-**Transformation Benefits:**
-
-- Better-auth receives data with expected field names
-- Proper session cookie generation: `better-auth.session_token=xxxxx`
-- Credential account recognition during signin
-- Seamless session validation in middleware
-
-#### Prisma Adapter Wrapper
-
-The `src/lib/auth.ts` file wraps the Prisma client to:
-
-1. Map better-auth field names → schema field names (on write)
-2. Transform data back to better-auth field names (on read)
-3. Handle field exclusions and transformations for each model:
-   - **User**: Converts `emailVerified: false` → `null`
-   - **Session**: Maps token and expiration field names
-   - **Account**: Maps provider and credential fields
-
-**Security Features:**
-
-- Passwords hashed with bcrypt (10 salt rounds)
-- HTTP-only cookies prevent XSS attacks
-- Secure flag enabled in production
-- 30-day session expiration
-- CSRF protection built into better-auth
-- SQL injection protected via Prisma ORM
+Singleton Supabase client instance:
+- Initialized with `SUPABASE_URL` and `SUPABASE_ANON_KEY`
+- Used across all API routes and client-side code
+- Manages authentication tokens automatically
 
 **Dependencies:**
 
-- `better-auth`: Modern authentication library
-- `bcryptjs`: Password hashing and verification
-- `@prisma/client`: Database ORM
-- `@prisma/adapter-pg`: PostgreSQL adapter for Prisma 7
-- `pg`: Node.js PostgreSQL client
+- `@supabase/supabase-js`: Official Supabase JavaScript client
 
-### Configuration (`src/lib/auth.ts`)
+### Database (`Supabase PostgreSQL`)
 
-Main authentication configuration with:
+**Database Provider: PostgreSQL (Supabase)**
+- Cloud-hosted PostgreSQL database via [Supabase](https://supabase.com)
+- Free tier: 500MB storage, generous bandwidth
+- Built-in authentication via `auth.users` table
+- No migration files needed (managed via Supabase dashboard or direct SQL)
 
-- **Email/Password Provider**: Enabled with `emailAndPassword: { enabled: true }`
-- **OAuth Providers**: Google and GitHub (configured via environment variables)
-- **Session**: 30-day expiration with automatic renewal
-- **Trusted Origins**: Localhost for development
+**Tables:**
 
-The wrapper pattern allows using better-auth while maintaining the existing Prisma schema.
+1. **auth.users** (managed by Supabase Auth)
+   - Built-in user management
+   - Email, password (hashed), user_metadata, app_metadata
+   - Email verification tracking
 
-### Database (`prisma/schema.prisma`)
-Four models required by Auth.js:
-1. **User**: Core user data (id, name, email, password, image)
-2. **Account**: OAuth provider accounts linked to users
-3. **Session**: Active user sessions with JWT tokens
-4. **VerificationToken**: Email verification tokens (future use)
+2. **WordWeb_feedback**
+   - id (UUID, PK)
+   - title (TEXT, ≥5 chars)
+   - description (TEXT, ≥10 chars)
+   - status (open/closed)
+   - author_id (FK → auth.users)
+   - created_at, updated_at, closed_at
+   - Indexes on status, author_id, created_at
 
-**Database Provider: PostgreSQL (Neon)**
-- Cloud-hosted PostgreSQL database on [Neon](https://neon.tech)
-- Free tier: 0.5GB storage, 3GB data transfer/month
-- Connection pooling enabled for better performance
-- Used for both development and production
+3. **WordWeb_comment**
+   - id (UUID, PK)
+   - feedback_id (FK → WordWeb_feedback)
+   - author_id (FK → auth.users)
+   - text (TEXT, 1-2000 chars)
+   - created_at, updated_at
 
-**Prisma Configuration (`prisma.config.ts`):**
-- **Prisma 7** uses separate config file (not in schema.prisma)
-- Database URL loaded from `.env` with `dotenv.config({ override: true })`
-- Override flag required to replace any existing env vars
-- Defines migrations path and datasource URL
+4. **WordWeb_label**
+   - id (UUID, PK)
+   - name (TEXT, UNIQUE)
+   - color (Tailwind classes)
+   - 8 predefined labels: bug, enhancement, feature, translations, export, ui, android, question
 
-**Database Client (`src/lib/db.ts`):**
-- Singleton pattern to prevent multiple Prisma instances
-- Reuses client in development mode via `global.prisma`
-- Auto-disconnects in production
+5. **WordWeb_feedback_label** (junction table)
+   - feedback_id FK → WordWeb_feedback
+   - label_id FK → WordWeb_label
+   - Primary key: (feedback_id, label_id)
+
+**Row Level Security (RLS)**
+
+All tables have RLS enabled with policies:
+- **WordWeb_feedback**: Anyone can SELECT, authenticated users can INSERT own feedback
+- **WordWeb_comment**: Anyone can SELECT, authenticated users can INSERT own comments
+- **WordWeb_label**: Anyone can SELECT (read-only)
+- **WordWeb_feedback_label**: Anyone can SELECT, authors can INSERT for their feedback
 
 ### Middleware (`src/middleware.ts`)
 
-Protects routes requiring authentication using better-auth sessions:
+Protects routes requiring authentication using Supabase Auth:
 
 - Runs on every request before page rendering
-- Checks for better-auth session via `auth.api.getSession()`
-- Reads session from `better-auth.session_token` cookie
-- Attaches session to `context.locals.session` for use in pages
+- Checks for Supabase access token in `sb-access-token` cookie
+- Calls `supabase.auth.getUser(accessToken)` to validate session
+- Attaches user object to `context.locals.user` for use in pages
 - Redirects unauthenticated users from protected routes (`/dashboard`, `/profile`)
-- Works seamlessly with both email/password and OAuth logins
+- Works seamlessly with email/password and OAuth logins
 
 **Session Validation:**
 
 ```typescript
 // In middleware
-const session = await auth.api.getSession({
-  headers: context.request.headers
-});
+const accessToken = context.cookies.get('sb-access-token')?.value;
+const { data: { user } } = await supabase.auth.getUser(accessToken);
 
 // In pages
-const session = Astro.locals.session;
-if (!session) return Astro.redirect('/login');
-const user = session.user;
+const user = Astro.locals.user;
+if (!user) return Astro.redirect('/login');
+// Access user: user.email, user.user_metadata.name
 ```
 
 **Type Definitions (`src/env.d.ts`):**
 
-Defines TypeScript types for `Astro.locals.session` to provide IDE autocomplete and type checking.
+Defines TypeScript types for `Astro.locals.user` to provide IDE autocomplete and type checking.
 
 ### Authentication Pages
 
@@ -223,22 +209,18 @@ Defines TypeScript types for `Astro.locals.session` to provide IDE autocomplete 
 
 Beautiful, responsive login UI with:
 
-- **OAuth buttons**: Google and GitHub with brand colors/logos
 - **Email/Password form**: Standard credentials input
-- **Divider**: "Or continue with email" separator
 - **Links**: "Forgot password?" and "Sign up" navigation
 - **Glass morphism design**: Matches site aesthetic
 - **Server-rendered**: `export const prerender = false`
 
 **Form Actions:**
 
-- Google: Uses `authClient.signIn.social({ provider: 'google' })`
-- GitHub: Uses `authClient.signIn.social({ provider: 'github' })`
-- Email/Password: Uses `authClient.signIn.email({ email, password })`
+- Email/Password: Uses `supabase.auth.signInWithPassword({ email, password })`
 
 **After Signin:**
 
-- Session cookie is automatically set
+- Session cookies automatically set by Supabase
 - Client redirects to `/dashboard` on success
 - Middleware validates session on protected routes
 
@@ -246,8 +228,6 @@ Beautiful, responsive login UI with:
 User registration with client-side validation:
 - **Form fields**: Name, email, password, confirm password
 - **Validation**: Password match check, minimum 8 characters
-- **OAuth options**: Same as login page
-- **API integration**: Posts to `/api/auth/signup`
 - **Client-side script**: Validates before submission, shows errors
 
 **Validation Rules:**
@@ -256,58 +236,76 @@ User registration with client-side validation:
 - Password confirmation must match
 - Terms & conditions checkbox required
 
+**Flow:**
+1. User enters name, email, password
+2. Calls `supabase.auth.signUp()` with email and password
+3. Stores name in `user_metadata`
+4. Redirects to `/check-email` page for confirmation
+
 #### Dashboard Page (`src/pages/dashboard.astro`)
 Protected user dashboard with:
-- **Session check**: Redirects if not authenticated
-- **User greeting**: Displays user name or email
+- **Auth check**: Redirects if not authenticated
+- **User greeting**: Displays user name or email from metadata
 - **Stats grid**: Placeholder stats (study time, bookmarks, notes)
-- **Account settings**: Profile info display
-- **Logout button**: Form POST to `/api/auth/signout`
+- **Account settings**: Profile info display (read-only)
+- **Logout button**: Calls `supabase.auth.signOut()`
 - **Download CTA**: Link back to homepage
 
 **Protected by:**
 1. Middleware check (redirects before page loads)
-2. In-page session check (double protection)
+2. In-page auth check (double protection)
 
-### API Endpoints
+### Feedback System API
 
-#### User Registration (`src/pages/api/auth/signup.ts`)
-Handles new user creation:
-1. **Validates input**: Checks for missing fields, password length
-2. **Checks duplicates**: Queries database for existing email
-3. **Hashes password**: bcrypt with 10 salt rounds
-4. **Creates user**: Prisma insert into User table
-5. **Returns response**: User data (without password) or error
+#### List Feedback (`/api/feedback/list?status=open&limit=50`)
+GET endpoint to fetch all feedback with optional filtering:
+- **Parameters**: `status` (open/closed), `limit` (default 50)
+- **Returns**: Array of feedback with labels and comment count
+- **Response**: `{ data: Feedback[] }`
 
-**Response Codes:**
-- `201`: Account created successfully
-- `400`: Missing fields or invalid password
-- `409`: User already exists
-- `500`: Internal server error
+#### Create Feedback (`/api/feedback/create`)
+POST endpoint - **REQUIRES AUTHENTICATION**
+- **Body**: `{ title, description, labelIds: string[] }`
+- **Validation**: Title ≥5 chars, description ≥10 chars
+- **Returns**: Created feedback object
+- **Response codes**: 201 (success), 400 (validation), 401 (unauthorized), 500 (error)
 
-**Security:**
-- SQL injection protected (Prisma parameterized queries)
-- Password never returned in response
-- Passwords hashed before storage
-- Email uniqueness enforced at DB level
+#### Get Feedback Detail (`/api/feedback/[id]`)
+GET endpoint to fetch single feedback with full details:
+- **Returns**: Feedback object with comments array and label details
+- **Response codes**: 200 (success), 404 (not found)
+
+#### Create Comment (`/api/feedback/[id]/comments/create`)
+POST endpoint - **REQUIRES AUTHENTICATION**
+- **Body**: `{ text }`
+- **Validation**: Text 1-2000 characters
+- **Returns**: Created comment object
+- **Response codes**: 201 (success), 400 (validation), 401 (unauthorized), 500 (error)
+
+#### List Labels (`/api/feedback/labels/list`)
+GET endpoint to fetch all available labels:
+- **Returns**: Array of label objects with name and color
+- **Used by**: Feedback creation form for label selection
 
 ### Session Management
 
-Handled automatically by better-auth:
+Handled automatically by Supabase Auth:
 
-- **Session tokens**: Stored in HTTP-only `better-auth.session_token` cookie
-- **Session duration**: 30-day expiration configured in `src/lib/auth.ts`
-- **Automatic refresh**: Session renewed on activity
+- **Session tokens**: Stored in HTTP-only `sb-access-token` cookie
+- **Refresh token**: Stored in `sb-refresh-token` cookie
+- **Token refresh**: Automatic when near expiration
+- **Session validation**: Called via middleware on every request
 - **Secure cookies**: HTTPS required in production
 
 ### Security Features
-1. **Password Hashing**: bcrypt with 10 salt rounds
-2. **SQL Injection Protection**: Prisma ORM parameterized queries
+1. **Password Hashing**: Handled by Supabase Auth (bcrypt)
+2. **SQL Injection Protection**: Supabase ORM parameterized queries
 3. **XSS Protection**: Input sanitization via Astro's template escaping
-4. **CSRF Protection**: Built into Auth.js
+4. **Row Level Security**: Database-level access control via RLS policies
 5. **Secure Cookies**: HTTP-only, secure flag in production
-6. **Input Validation**: Email format, password length checks
+6. **Input Validation**: Supabase-level constraints (length, required fields)
 7. **Route Protection**: Middleware prevents unauthorized access
+8. **PKCE Flow**: Used for OAuth authentication
 
 ## Key Implementation Details
 
@@ -330,49 +328,66 @@ Compact single-page design with sections:
 - Decorative animated blobs with `animate-blob` custom animation
 
 ### Feedback Page (`feedback.astro`)
-GitHub Issues-inspired interactive interface with client-side JavaScript.
+GitHub Issues-inspired interactive interface backed by real Supabase data.
 
 **Architecture:**
-- **Server-side**: Astro component renders initial HTML structure
+- **Server-side**: Astro component renders initial HTML structure with auth check
 - **Client-side**: `<script is:inline>` contains all interactive logic
-  - Mock data stored in `issues` array
+  - Data loaded from `/api/feedback/*` endpoints
   - Dynamic rendering via `renderIssues()` and `renderIssueList()`
-  - Event handlers for tabs, forms, modals
+  - Event handlers for tabs, forms, modals, API calls
 
 **Key Features:**
 1. **Issue List View**:
-   - Open/Closed tabs with counters
+   - Open/Closed tabs with live counters
    - Issues rendered with labels, metadata, comment counts
-   - Click to open detail modal
+   - Click to open detail modal with full comments section
 
-2. **Issue Creation**:
+2. **Issue Creation** (requires login):
    - Form with title, description, label selection
-   - Submits to in-memory array (demo only)
-   - Form validation and reset on submit
+   - Submits to `/api/feedback/create` API
+   - Form validation (title ≥5 chars, description ≥10 chars)
+   - Reloads data on success and shows confirmation
 
 3. **Issue Detail Modal**:
    - Full overlay with scrollable content
    - Displays title, description, status, labels
-   - Shows existing comments
-   - Comment input (UI only, not functional)
+   - Shows existing comments with author and timestamp
+   - Comment input (requires authentication)
+
+4. **Label Management**:
+   - Labels loaded from database on page load
+   - 8 predefined labels with Tailwind color classes
+   - Label buttons generated dynamically from API data
+   - Selection tracked in `selectedLabels` Set during form submission
 
 **Important JavaScript Patterns:**
-- Uses `getAttribute('data-*')` instead of TypeScript-style `dataset` for compatibility
+- Uses `getAttribute('data-*')` for data attributes
 - All DOM queries check for `null` before manipulation
 - Modal management with `hidden` class and `overflow` style
 - Uses `is:inline` directive to prevent Astro from bundling/transforming script
+- `async/await` for API calls with proper error handling
 
 ### Data Flow in Feedback Page
 ```
-User Action → Event Listener → Update Data Array → Re-render DOM
+Page Load → loadData() → Fetch from APIs → renderIssues() → Display
+
+User Action → Event Handler → API Call → loadData() → Re-render
 ```
 Example: Creating a new issue:
-1. User fills form and submits
-2. `issueForm` submit handler captures data
-3. Creates new issue object with auto-incrementing ID
-4. Adds to `issues` array with `unshift()`
-5. Calls `renderIssues()` to update UI
-6. Resets form and shows alert
+1. User fills form (title, description, labels) and submits
+2. Form submit handler calls `/api/feedback/create` with POST
+3. Server validates and creates feedback + label associations
+4. Client calls `loadData()` to refresh from server
+5. Issues list re-renders with new feedback at top
+6. Form resets and shows success alert
+
+**Authentication Integration:**
+- Unauthenticated users see "Login to Create Issue" button
+- Login button links to `/login` page
+- Authenticated users see "New Issue" button
+- API endpoints check auth via middleware before allowing creation
+- Comments require authentication (enforced via RLS policy)
 
 ## Configuration Files
 
@@ -427,69 +442,60 @@ Example: Creating a new issue:
 
 1. Create page in `src/pages/` (e.g., `profile.astro`)
 2. Add `export const prerender = false` for SSR
-3. Add route path to `protectedRoutes` array in `src/middleware.ts`
-4. Add session check in page frontmatter:
+3. Add route path to `protectedRoutes` array in `src/config/constants.ts`
+4. Add auth check in page frontmatter:
    ```typescript
-   const session = Astro.locals.session;
-   if (!session) return Astro.redirect('/login');
+   const user = Astro.locals.user;
+   if (!user) return Astro.redirect(ROUTES.LOGIN);
    ```
 
-### Testing Authentication
-
-Test scripts are organized in the `tests/` folder:
-
-- `tests/test-db.js` - Database connectivity and schema validation
-- `tests/test-users.js` - User management operations
-- `tests/test-password.js` - Password hashing and verification
-
-**Running Tests:**
-
-```bash
-node tests/test-db.js      # Test database connection
-node tests/test-users.js   # Test user CRUD operations
-node tests/test-password.js # Test password functions
-```
-
 ### Working with Database
-**Using Prisma Client:**
+
+**Using Supabase Client:**
 ```typescript
-import { db } from '../lib/db';
+import { supabase } from '../lib/supabase';
 
-// Query user
-const user = await db.user.findUnique({ where: { email } });
+// Query feedback
+const { data, error } = await supabase
+  .from('WordWeb_feedback')
+  .select('*')
+  .eq('status', 'open');
 
-// Create user
-const newUser = await db.user.create({ data: { name, email, password } });
+// Create feedback (authenticated)
+const { data: newFeedback, error } = await supabase
+  .from('WordWeb_feedback')
+  .insert({ title, description, author_id: user.id })
+  .select()
+  .single();
 
-// Update user
-await db.user.update({ where: { id }, data: { name: 'New Name' } });
+// Update feedback
+await supabase
+  .from('WordWeb_feedback')
+  .update({ status: 'closed' })
+  .eq('id', feedbackId);
 ```
 
-**After schema changes:**
-1. Update `prisma/schema.prisma`
-2. Run `npx prisma migrate dev --name description`
-3. Run `npx prisma generate` to update client
+**Adding Database Tables:**
+1. Go to Supabase dashboard → SQL Editor
+2. Create migration with table schema
+3. Enable Row Level Security (RLS) for access control
+4. Create RLS policies for authenticated users
+5. Add indexes for query performance
 
 ### Adding OAuth Providers
 
-1. Add provider configuration in `src/lib/auth.ts` under `socialProviders`
-2. Add environment variables to `.env` and `.env.example`:
-   - `PROVIDER_CLIENT_ID`
-   - `PROVIDER_CLIENT_SECRET`
-3. Update login/signup pages with new OAuth button
-4. Configure OAuth app redirect URI: `http://localhost:4321/api/auth/callback/provider`
-5. Better-auth automatically handles the callback and session creation
+1. Go to Supabase dashboard → Authentication → Providers
+2. Enable provider (Google, GitHub, etc.)
+3. Add OAuth app credentials from provider console
+4. Configure redirect URIs:
+   - Development: `http://localhost:4321/auth/v1/callback`
+   - Production: `https://your-domain.com/auth/v1/callback`
+5. Test login flow via `/login` page
 
-**Example Provider Addition:**
-
-```typescript
-// In src/lib/auth.ts
-socialProviders: {
-  google: { ... },
-  github: { ... },
-  // Add new provider here with clientId and clientSecret
-}
-```
+**OAuth Redirect URIs:**
+- Supabase handles OAuth callbacks automatically
+- Redirect URIs should point to `{SUPABASE_URL}/auth/v1/callback`
+- Tokens set automatically in cookies after successful auth
 
 ### Working with Feedback Page JavaScript
 **Important**: The feedback page uses inline JavaScript (`<script is:inline>`) to avoid Astro's bundling.
@@ -498,14 +504,37 @@ socialProviders: {
 - Avoid TypeScript syntax (type assertions, interfaces)
 - Use plain JavaScript with null checks
 - Access data attributes via `getAttribute('data-*')`
+- Use `async/await` for API calls with proper error handling
 - Test form reset with `issueForm.reset` check before calling
 
-**To add new issue fields:**
-1. Update issue object structure in data array
-2. Modify `renderIssueList()` template string
-3. Update `openIssueModal()` to display new fields
-4. Add form inputs in "New Issue Form" section
-5. Capture new values in form submit handler
+**To add new feedback fields:**
+1. Update API request body in form submit handler
+2. Add form input in "New Issue Form" section
+3. Capture new values in form submit handler
+4. Include in API POST to `/api/feedback/create`
+5. Update API endpoint to accept and validate new fields
+
+**To modify displayed data:**
+1. Update `renderIssueList()` template string for list view
+2. Update `openIssueModal()` to display in modal view
+3. Ensure API response includes the data (may need to update API endpoint)
+
+**API Call Pattern:**
+```javascript
+const response = await fetch('/api/feedback/create', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ title, description, labelIds })
+});
+
+if (!response.ok) {
+  const error = await response.json();
+  alert(error.error || 'Failed');
+  return;
+}
+
+await loadData(); // Refresh from server
+```
 
 ### Navigation Pattern
 Navigation varies by page and authentication state:
@@ -517,21 +546,35 @@ Navigation varies by page and authentication state:
 
 ### Environment Setup
 **Required for authentication:**
-1. **Create Neon PostgreSQL database**: Sign up at https://neon.tech and create a project
+1. **Create Supabase Project**: Sign up at https://supabase.com and create a new project
 2. Copy `.env.example` to `.env`
-3. Add your **Neon connection string** to `DATABASE_URL` in `.env`
-4. Generate `AUTH_SECRET`: `node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"`
-5. Set up OAuth providers (see `SETUP_AUTH.md` for detailed instructions)
-6. Install dotenv: `npm install --save-dev dotenv`
-7. Run `npx prisma generate` to create Prisma client
-8. Run `npx prisma migrate dev` to initialize database
+3. Add your **Supabase URL** to `SUPABASE_URL` in `.env`
+4. Add your **Supabase Anon Key** to `SUPABASE_ANON_KEY` in `.env`
+5. (Optional) Set up OAuth providers in Supabase dashboard:
+   - Enable Google OAuth: Add credentials from Google Cloud Console
+   - Enable GitHub OAuth: Add credentials from GitHub Developer Settings
+   - Configure redirect URIs to your app domain
+6. Run `npm install` to install dependencies
+7. Run `npm run dev` to start development server
+
+**Database Tables:**
+- Supabase automatically creates `auth.users` table
+- Run SQL migrations in Supabase dashboard to create feedback tables:
+  ```sql
+  -- Tables created via migration in Supabase dashboard
+  -- See CLAUDE.md Database section for schema
+  ```
 
 **Important Notes:**
-- Database uses **PostgreSQL** (Neon cloud) for both development and production
-- Prisma 7 requires `dotenv` package to load `.env` file
-- `prisma.config.ts` uses `override: true` to prevent env var caching issues
+- Database uses **PostgreSQL** (Supabase cloud) for both development and production
+- Auth tokens stored in HTTP-only cookies: `sb-access-token`, `sb-refresh-token`
+- Supabase automatically handles token refresh
+- Row Level Security (RLS) policies provide database-level access control
 
-**See `SETUP_AUTH.md` for complete setup instructions.**
+**Alternative: Use Existing Supabase Project**
+- Project ID: `nfvfptldjwqzojrajuux` (StudyBible project)
+- Tables already created with migrations and RLS policies
+- Just add credentials to `.env` file
 
 ## Related Projects
 
@@ -552,44 +595,34 @@ Running `npm run build` generates:
 
 **Recommended Deployment: Vercel (FREE)**
 
-1. **Install Vercel adapter:**
-   ```bash
-   npm install @astrojs/vercel
-   ```
+1. **Connect GitHub repository to Vercel** - Automatic deployments on push
 
-2. **Update `astro.config.mjs`:**
-   ```javascript
-   import vercel from '@astrojs/vercel/serverless';
-
-   export default defineConfig({
-     integrations: [tailwind(), auth()],
-     output: 'server',
-     adapter: vercel(), // Change from node()
-   });
-   ```
-
-3. **Deploy:**
-   ```bash
-   npx vercel deploy
-   ```
-
-4. **Add environment variables in Vercel dashboard:**
-   - `DATABASE_URL` - Your Neon PostgreSQL connection string
-   - `AUTH_SECRET` - Your auth secret from `.env`
+2. **Add environment variables in Vercel dashboard:**
+   - `SUPABASE_URL` - Your Supabase project URL
+   - `SUPABASE_ANON_KEY` - Your Supabase anon key
    - `GOOGLE_CLIENT_ID` & `GOOGLE_CLIENT_SECRET` (when configured)
    - `GITHUB_CLIENT_ID` & `GITHUB_CLIENT_SECRET` (when configured)
+
+3. **Configure OAuth redirect URIs:**
+   - In Supabase dashboard → Authentication → Providers
+   - Update redirect URI to: `https://your-domain.com/auth/v1/callback`
 
 **Alternative Platforms:**
 - **Railway** (~$5/month) - Simple all-in-one platform
 - **Render** (FREE tier with cold starts) - Good for getting started
+- **Netlify** (with Serverless Functions) - Good for edge functions
 
 **Deployment Requirements:**
 - Node.js runtime for SSR pages
 - Environment variables configured on host
-- **Neon PostgreSQL database** accessible from deployment (same DB for dev & prod)
+- **Supabase PostgreSQL database** accessible from deployment (same DB for dev & prod)
 - OAuth redirect URIs updated for production domain
-- Update OAuth callback URLs to production domain
+- Ensure SUPABASE_URL is accessible from the deployment region
 
-## Additional Documentation
-
-- **`SETUP_AUTH.md`**: Complete authentication setup guide with OAuth configuration, troubleshooting, and production deployment instructions
+**Post-Deployment Checklist:**
+- [ ] Verify Supabase database connection from deployed app
+- [ ] Test email/password authentication flow
+- [ ] Test OAuth providers (if configured)
+- [ ] Verify feedback creation and commenting work
+- [ ] Check error logs for auth failures
+- [ ] Test session persistence across page refreshes

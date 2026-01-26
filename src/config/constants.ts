@@ -41,27 +41,34 @@ export const AUTH_CONFIG = {
 
 // Application metadata
 export const APP_CONFIG = {
-  NAME: 'StudyBible',
-  DESCRIPTION: 'Native Bible study application built with Rust',
-  TAGLINE: '1000+ translations · Parallel view · Fast & offline',
+  NAME: 'PureStream\'s StudyBible',
+  PLATFORM_NAME: 'PureStream',
+  APP_NAME: 'StudyBible',
+  DESCRIPTION: 'A modern, fast, and offline Bible study application built with Rust and Dioxus.',
+  TAGLINE: 'Deepen your study with a modern native experience.',
+  VERSION: '0.1.0-alpha',
+  STATUS: 'Coming Soon',
   ICON: '📖',
-  GITHUB_URL: 'https://github.com/SujithChristopher/StudyBible',
+  GITHUB_URL: 'https://github.com/Pure-Stream/StudyBible-Releases',
+  RELEASES_URL: 'https://github.com/Pure-Stream/StudyBible-Releases/releases/latest',
+  EVALUATION_NOTICE: '⚠️ These files are for evaluation purposes only. The application is currently in active development and has not been officially launched.',
 } as const;
 
 // Stats displayed on homepage
 export const APP_STATS = {
   TRANSLATIONS: '1000+',
-  BOOKS: '66',
-  PLATFORMS: '4',
-  FREE_PERCENTAGE: '100%',
+  LANGUAGES: '100+',
+  PLATFORMS: '5',
 } as const;
 
 // Supported platforms
 export const PLATFORMS = [
-  { name: 'Windows', icon: '🪟', requirement: 'Windows 10+' },
-  { name: 'macOS', icon: '🍎', requirement: 'macOS 10.15+' },
-  { name: 'Linux', icon: '🐧', requirement: 'All distributions' },
-  { name: 'Android', icon: '🤖', requirement: 'Coming Soon' },
+  { name: 'Windows x86_64', icon: '🪟', requirement: '.zip archive', status: 'Available', downloadUrl: 'https://github.com/Pure-Stream/StudyBible-Releases/releases/latest' },
+  { name: 'Linux x86_64', icon: '🐧', requirement: '.tar.gz archive', status: 'Available', downloadUrl: 'https://github.com/Pure-Stream/StudyBible-Releases/releases/latest' },
+  { name: 'Android', icon: '🤖', requirement: '.apk package', status: 'Available', downloadUrl: 'https://github.com/Pure-Stream/StudyBible-Releases/releases/latest' },
+  { name: 'macOS', icon: '🍎', requirement: 'macOS 10.15+', status: 'Coming Soon' },
+  { name: 'iPhone & iPad', icon: '📱', requirement: 'iOS / iPadOS', status: 'Coming Soon' },
+  { name: 'Linux ARM64', icon: '🐧', requirement: 'ARM architecture', status: 'Coming Soon' },
 ] as const;
 
 // Technology stack

@@ -1,612 +1,187 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { getSession } from 'auth-astro/server';
+import Navigation from '../components/Navigation.astro';
+import { APP_CONFIG } from '../config/constants';
 
-export const prerender = false; // Need server-side rendering for session
-
-const session = await getSession(Astro.request);
+// Static page - no server-side rendering needed
+export const prerender = true;
 ---
 
-<Layout title="Feedback - StudyBible">
-  <!-- Navigation -->
-  <nav class="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-700 shadow-sm">
-    <div class="max-w-7xl mx-auto px-6 py-3">
-      <div class="flex items-center justify-between">
-        <a href="/" class="flex items-center gap-2">
-          <span class="text-2xl">📖</span>
-          <span class="font-display text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">StudyBible</span>
+<Layout title="Feedback - PureStream's StudyBible">
+  <Navigation />
+
+  <main class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-900 py-16 px-6 relative overflow-hidden">
+    <!-- Animated background blobs -->
+    <div class="absolute top-0 left-0 w-96 h-96 bg-blue-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob dark:opacity-10"></div>
+    <div class="absolute top-0 right-0 w-96 h-96 bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000 dark:opacity-10"></div>
+    <div class="absolute -bottom-8 left-20 w-96 h-96 bg-pink-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000 dark:opacity-10"></div>
+
+    <div class="max-w-4xl mx-auto relative z-10">
+      <!-- Hero Section -->
+      <div class="text-center mb-16">
+        <div class="mb-6 text-7xl">📝</div>
+        <h1 class="text-5xl md:text-6xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent mb-4">
+          Share Your Feedback
+        </h1>
+        <p class="text-xl text-slate-600 dark:text-slate-400 mb-2 max-w-2xl mx-auto">
+          Help us improve StudyBible by reporting bugs, suggesting features, and sharing your ideas.
+        </p>
+        <p class="text-lg text-slate-500 dark:text-slate-400 max-w-2xl mx-auto">
+          All feedback is managed on GitHub where you can track discussions and see how your suggestions are implemented.
+        </p>
+      </div>
+
+      <!-- Primary CTAs -->
+      <div class="flex flex-col sm:flex-row gap-4 justify-center mb-16">
+        <a
+          href={`${APP_CONFIG.GITHUB_URL}/issues`}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-lg hover:shadow-2xl hover:scale-105 transition-all duration-200 flex items-center justify-center gap-2 group"
+        >
+          <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0113 2.586L15.414 5A2 2 0 0116 6.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"></path>
+          </svg>
+          View Issues
         </a>
-        <div class="flex items-center gap-6">
-          <a href="/#features" class="text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-medium transition-colors">Features</a>
-          <a href="/#download" class="text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-medium transition-colors">Download</a>
-          <a href="/feedback" class="text-blue-600 dark:text-blue-400 font-medium">Feedback</a>
+        <a
+          href={`${APP_CONFIG.GITHUB_URL}/issues/new`}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="px-8 py-4 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-semibold rounded-lg border-2 border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2 group"
+        >
+          <svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+          </svg>
+          Report New Issue
+        </a>
+      </div>
 
-          <!-- Theme Toggle Button -->
-          <button
-            id="themeToggle"
-            class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all"
-            aria-label="Toggle theme"
+      <!-- Info Cards Grid -->
+      <div class="grid md:grid-cols-3 gap-6 mb-16">
+        <!-- Bug Reports Card -->
+        <div class="bg-white/60 dark:bg-slate-800/60 backdrop-blur-md border border-white/20 dark:border-slate-700/20 rounded-2xl p-8 hover:shadow-xl transition-all duration-200 hover:bg-white/80 dark:hover:bg-slate-800/80">
+          <div class="text-5xl mb-4">🐛</div>
+          <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-3">Report a Bug</h3>
+          <p class="text-slate-600 dark:text-slate-300 mb-6 leading-relaxed">
+            Found something that isn't working as expected? Let us know so we can fix it quickly.
+          </p>
+          <a
+            href={`${APP_CONFIG.GITHUB_URL}/issues/new?labels=bug`}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 font-semibold hover:gap-3 transition-all group"
           >
-            <svg id="sunIcon" class="w-5 h-5 text-slate-600 dark:text-slate-400 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+            Report Bug
+            <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
             </svg>
-            <svg id="moonIcon" class="w-5 h-5 text-slate-600 dark:text-slate-400 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
-            </svg>
-          </button>
-
-          {session ? (
-            <a href="/dashboard" class="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-lg hover:shadow-lg transition-all text-sm">
-              Dashboard
-            </a>
-          ) : (
-            <a href="/login" class="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-lg hover:shadow-lg transition-all text-sm">
-              Login
-            </a>
-          )}
-        </div>
-      </div>
-    </div>
-  </nav>
-
-  <main class="min-h-screen bg-slate-50 dark:bg-slate-950 py-8 px-6">
-    <div class="max-w-5xl mx-auto">
-      <!-- Header -->
-      <div class="mb-6">
-        <h1 class="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">Feedback & Issues</h1>
-        <p class="text-slate-600 dark:text-slate-400">Share your ideas and report bugs to help improve StudyBible</p>
-      </div>
-
-      <!-- Tabs and New Issue Button -->
-      <div class="bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 mb-6">
-        <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-700">
-          <div class="flex gap-4">
-            <button
-              id="openTab"
-              class="tab-button active flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors"
-            >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="10" stroke-width="2"></circle>
-              </svg>
-              <span id="openCount">4</span> Open
-            </button>
-            <button
-              id="closedTab"
-              class="tab-button flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors"
-            >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-              </svg>
-              <span id="closedCount">2</span> Closed
-            </button>
-          </div>
-{session ? (
-            <button
-              id="newIssueBtn"
-              class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors flex items-center gap-2"
-            >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-              </svg>
-              New Issue
-            </button>
-          ) : (
-            <a
-              href="/login"
-              class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors flex items-center gap-2"
-            >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-              </svg>
-              Login to Create Issue
-            </a>
-          )}
-        </div>
-
-        <!-- Open Issues List -->
-        <div id="openIssues" class="issue-list"></div>
-
-        <!-- Closed Issues List -->
-        <div id="closedIssues" class="issue-list hidden"></div>
-      </div>
-
-      <!-- New Issue Form (Hidden by default) -->
-      <div id="newIssueForm" class="hidden bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-6 mb-6">
-        <h2 class="text-xl font-bold text-slate-900 dark:text-slate-100 mb-4">Create New Issue</h2>
-        <form id="issueForm">
-          <div class="mb-4">
-            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Title *</label>
-            <input
-              type="text"
-              id="issueTitle"
-              required
-              placeholder="Brief description of the issue"
-              class="w-full px-4 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-            />
-          </div>
-          <div class="mb-4">
-            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Description *</label>
-            <textarea
-              id="issueDescription"
-              required
-              rows="6"
-              placeholder="Provide detailed information about the issue or feature request..."
-              class="w-full px-4 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none"
-            ></textarea>
-          </div>
-          <div class="mb-4">
-            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Labels</label>
-            <div class="flex flex-wrap gap-2" id="labelContainer">
-              <button type="button" class="label-btn px-3 py-1.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors" data-label="bug">Bug</button>
-              <button type="button" class="label-btn px-3 py-1.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors" data-label="enhancement">Enhancement</button>
-              <button type="button" class="label-btn px-3 py-1.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors" data-label="feature">Feature</button>
-              <button type="button" class="label-btn px-3 py-1.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors" data-label="question">Question</button>
-            </div>
-          </div>
-          <div class="flex gap-3">
-            <button
-              type="submit"
-              class="px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors"
-            >
-              Submit Issue
-            </button>
-            <button
-              type="button"
-              id="cancelIssueBtn"
-              class="px-6 py-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-medium rounded-lg transition-colors"
-            >
-              Cancel
-            </button>
-          </div>
-        </form>
-      </div>
-
-      <!-- Issue Detail Modal -->
-      <div id="issueModal" class="fixed inset-0 bg-black/50 dark:bg-black/70 hidden z-50 flex items-start justify-center pt-20 px-6">
-        <div class="bg-white dark:bg-slate-900 rounded-lg shadow-2xl max-w-3xl w-full max-h-[80vh] overflow-y-auto">
-          <div class="p-6 border-b border-slate-200 dark:border-slate-700">
-            <div class="flex items-start justify-between mb-4">
-              <h2 id="modalTitle" class="text-2xl font-bold text-slate-900 dark:text-slate-100 flex-1"></h2>
-              <button id="closeModal" class="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                </svg>
-              </button>
-            </div>
-            <div class="flex items-center gap-3 text-sm text-slate-600 dark:text-slate-400">
-              <span id="modalStatus"></span>
-              <span id="modalAuthor"></span>
-              <span id="modalDate"></span>
-            </div>
-            <div id="modalLabels" class="flex gap-2 mt-3"></div>
-          </div>
-          <div class="p-6">
-            <p id="modalDescription" class="text-slate-700 dark:text-slate-300 leading-relaxed mb-6"></p>
-
-            <!-- Comments Section -->
-            <div class="border-t border-slate-200 dark:border-slate-700 pt-6">
-              <h3 class="font-bold text-slate-900 dark:text-slate-100 mb-4">Comments (<span id="modalCommentCount">0</span>)</h3>
-              <div id="commentsContainer" class="space-y-4 mb-6">
-                <!-- Comments will be dynamically added -->
-              </div>
-
-              <!-- Add Comment -->
-              <div class="bg-slate-50 dark:bg-slate-800 rounded-lg p-4">
-                <textarea
-                  placeholder="Write a comment..."
-                  class="w-full px-4 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none mb-2"
-                  rows="3"
-                ></textarea>
-                <button class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors text-sm">
-                  Add Comment
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Info Message -->
-      {!session && (
-        <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 text-center">
-          <p class="text-blue-900 font-medium mb-2">Want to report an issue or suggest a feature?</p>
-          <p class="text-blue-700 mb-4">Please log in to create and track your feedback.</p>
-          <a href="/login" class="inline-block px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors">
-            Login to Get Started
           </a>
         </div>
-      )}
+
+        <!-- Feature Requests Card -->
+        <div class="bg-white/60 dark:bg-slate-800/60 backdrop-blur-md border border-white/20 dark:border-slate-700/20 rounded-2xl p-8 hover:shadow-xl transition-all duration-200 hover:bg-white/80 dark:hover:bg-slate-800/80">
+          <div class="text-5xl mb-4">💡</div>
+          <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-3">Suggest a Feature</h3>
+          <p class="text-slate-600 dark:text-slate-300 mb-6 leading-relaxed">
+            Have an idea to make StudyBible better? Share your feature requests and see community support.
+          </p>
+          <a
+            href={`${APP_CONFIG.GITHUB_URL}/issues/new?labels=enhancement`}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 font-semibold hover:gap-3 transition-all group"
+          >
+            Suggest Feature
+            <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </a>
+        </div>
+
+        <!-- Browse Issues Card -->
+        <div class="bg-white/60 dark:bg-slate-800/60 backdrop-blur-md border border-white/20 dark:border-slate-700/20 rounded-2xl p-8 hover:shadow-xl transition-all duration-200 hover:bg-white/80 dark:hover:bg-slate-800/80">
+          <div class="text-5xl mb-4">👀</div>
+          <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-3">Browse Issues</h3>
+          <p class="text-slate-600 dark:text-slate-300 mb-6 leading-relaxed">
+            See what others are working on, upvote ideas you like, and join the discussion.
+          </p>
+          <a
+            href={`${APP_CONFIG.GITHUB_URL}/issues`}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 font-semibold hover:gap-3 transition-all group"
+          >
+            View All Issues
+            <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- GitHub Account Info -->
+      <div class="bg-blue-50 dark:bg-blue-950/30 border-2 border-blue-200 dark:border-blue-800 rounded-2xl p-8 text-center max-w-2xl mx-auto">
+        <div class="mb-4 text-4xl">🔗</div>
+        <h2 class="text-2xl font-bold text-blue-900 dark:text-blue-100 mb-3">Need a GitHub Account?</h2>
+        <p class="text-blue-800 dark:text-blue-200 mb-6 leading-relaxed">
+          GitHub is free and takes just a few minutes to set up. You'll be able to:
+        </p>
+        <ul class="text-left text-blue-800 dark:text-blue-200 mb-6 space-y-2 inline-block">
+          <li class="flex items-center gap-2">
+            <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"></path>
+            </svg>
+            Report and track bugs
+          </li>
+          <li class="flex items-center gap-2">
+            <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"></path>
+            </svg>
+            Upvote and comment on issues
+          </li>
+          <li class="flex items-center gap-2">
+            <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"></path>
+            </svg>
+            Be part of the community
+          </li>
+        </ul>
+        <a
+          href="https://github.com/signup"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-block px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-all hover:shadow-lg"
+        >
+          Create Free GitHub Account
+        </a>
+      </div>
     </div>
   </main>
 </Layout>
 
-<script is:inline>
-  // Theme toggle functionality
-  function initTheme() {
-    const theme = localStorage.getItem('theme') ||
-      (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }
-
-  function toggleTheme() {
-    const html = document.documentElement;
-    const isDark = html.classList.contains('dark');
-
-    if (isDark) {
-      html.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-    } else {
-      html.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    }
-  }
-
-  initTheme();
-
-  document.addEventListener('DOMContentLoaded', () => {
-    const themeToggle = document.getElementById('themeToggle');
-    if (themeToggle) {
-      themeToggle.addEventListener('click', toggleTheme);
-    }
-  });
-</script>
-
-<script is:inline>
-  // Initial data
-  let issues = [
-    {
-      id: 1,
-      title: 'Add verse highlighting feature',
-      description: 'It would be great to highlight important verses in different colors. This would help users mark important passages and organize their study better.',
-      status: 'open',
-      labels: ['enhancement', 'feature'],
-      author: 'user123',
-      comments: [
-        { author: 'dev1', text: 'Great idea! We\'re planning to add this in the next release.', date: '2025-01-16' },
-        { author: 'user456', text: 'Would love to see color customization options!', date: '2025-01-17' }
-      ],
-      createdAt: '2025-01-15',
-    },
-    {
-      id: 2,
-      title: 'Support for more Indian languages',
-      description: 'Please add Hindi, Telugu, and Malayalam translations. These are widely used languages and would help many users.',
-      status: 'open',
-      labels: ['enhancement', 'translations'],
-      author: 'biblelover',
-      comments: [
-        { author: 'admin', text: 'We\'re working on expanding language support!', date: '2025-01-15' }
-      ],
-      createdAt: '2025-01-14',
-    },
-    {
-      id: 3,
-      title: 'Export notes as PDF',
-      description: 'Allow users to export their bookmarks and notes as a PDF document for offline reading or sharing.',
-      status: 'open',
-      labels: ['feature', 'export'],
-      author: 'johnsmith',
-      comments: [],
-      createdAt: '2025-01-13',
-    },
-    {
-      id: 4,
-      title: 'Cross-reference linking',
-      description: 'Add ability to link related verses together for better study connections.',
-      status: 'open',
-      labels: ['enhancement'],
-      author: 'studyenthusiast',
-      comments: [],
-      createdAt: '2025-01-12',
-    },
-    {
-      id: 5,
-      title: 'App crashes on Android 12',
-      description: 'The app force closes when opening on Android 12 devices. Need to investigate compatibility issues.',
-      status: 'closed',
-      labels: ['bug', 'android'],
-      author: 'androiduser',
-      comments: [
-        { author: 'dev1', text: 'Fixed in version 0.1.2', date: '2025-01-14' }
-      ],
-      createdAt: '2025-01-10',
-      closedAt: '2025-01-14',
-    },
-    {
-      id: 6,
-      title: 'Dark mode doesn\'t apply to sidebar',
-      description: 'When enabling dark mode, the sidebar remains in light theme causing inconsistency.',
-      status: 'closed',
-      labels: ['bug', 'ui'],
-      author: 'nightowl',
-      comments: [],
-      createdAt: '2025-01-08',
-      closedAt: '2025-01-11',
-    },
-  ];
-
-  let nextId = 7;
-  let selectedLabels = new Set();
-
-  // Render functions
-  function renderIssues() {
-    const openIssues = issues.filter(i => i.status === 'open');
-    const closedIssues = issues.filter(i => i.status === 'closed');
-
-    const openCountEl = document.getElementById('openCount');
-    const closedCountEl = document.getElementById('closedCount');
-    if (openCountEl) openCountEl.textContent = String(openIssues.length);
-    if (closedCountEl) closedCountEl.textContent = String(closedIssues.length);
-
-    renderIssueList('openIssues', openIssues);
-    renderIssueList('closedIssues', closedIssues);
-  }
-
-  function renderIssueList(containerId, issuesList) {
-    const container = document.getElementById(containerId);
-    if (!container) return;
-
-    if (issuesList.length === 0) {
-      container.innerHTML = '<div class="px-6 py-8 text-center text-slate-500">No issues found</div>';
-      return;
-    }
-
-    container.innerHTML = issuesList.map(issue => `
-      <div class="issue-item border-b border-slate-100 dark:border-slate-700 px-6 py-4 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer" data-issue-id="${issue.id}">
-        <div class="flex items-start gap-3">
-          <div class="mt-1">
-            <svg class="w-5 h-5 ${issue.status === 'open' ? 'text-green-600' : 'text-purple-600'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              ${issue.status === 'open'
-                ? '<circle cx="12" cy="12" r="10" stroke-width="2"></circle>'
-                : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>'
-              }
-            </svg>
-          </div>
-          <div class="flex-1 min-w-0">
-            <div class="flex items-start justify-between gap-4">
-              <div class="flex-1">
-                <h3 class="font-semibold ${issue.status === 'open' ? 'text-slate-900 dark:text-slate-100' : 'text-slate-700 dark:text-slate-300'} hover:text-blue-600 dark:hover:text-blue-400 mb-1">
-                  ${issue.title}
-                </h3>
-                <div class="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400">
-                  <span>#${issue.id} ${issue.status === 'closed' ? 'by' : 'opened on'} ${issue.status === 'closed' ? issue.author : issue.createdAt}</span>
-                  ${issue.status === 'open' ? `<span>by ${issue.author}</span>` : `<span>closed on ${issue.closedAt}</span>`}
-                  <div class="flex gap-2">
-                    ${issue.labels.map(label => `
-                      <span class="px-2 py-0.5 rounded-full text-xs font-medium ${getLabelClass(label)}">
-                        ${label}
-                      </span>
-                    `).join('')}
-                  </div>
-                </div>
-              </div>
-              <div class="flex items-center gap-1 text-slate-500 dark:text-slate-400">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
-                </svg>
-                <span class="text-sm">${issue.comments?.length || 0}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    `).join('');
-
-    // Add click handlers
-    container.querySelectorAll('.issue-item').forEach(item => {
-      item.addEventListener('click', () => {
-        const issueId = parseInt(item.getAttribute('data-issue-id') || '0');
-        openIssueModal(issueId);
-      });
-    });
-  }
-
-  function getLabelClass(label) {
-    const classes = {
-      bug: 'bg-red-100 text-red-700',
-      enhancement: 'bg-blue-100 text-blue-700',
-      feature: 'bg-purple-100 text-purple-700',
-      translations: 'bg-green-100 text-green-700',
-      export: 'bg-orange-100 text-orange-700',
-      ui: 'bg-indigo-100 text-indigo-700',
-      android: 'bg-green-100 text-green-700',
-      question: 'bg-yellow-100 text-yellow-700',
-    };
-    return classes[label] || 'bg-slate-100 text-slate-700';
-  }
-
-  function openIssueModal(issueId) {
-    const issue = issues.find(i => i.id === issueId);
-    if (!issue) return;
-
-    const modalTitle = document.getElementById('modalTitle');
-    const modalDescription = document.getElementById('modalDescription');
-    const modalStatus = document.getElementById('modalStatus');
-    const modalAuthor = document.getElementById('modalAuthor');
-    const modalDate = document.getElementById('modalDate');
-    const modalCommentCount = document.getElementById('modalCommentCount');
-    const modalLabels = document.getElementById('modalLabels');
-
-    if (modalTitle) modalTitle.textContent = issue.title;
-    if (modalDescription) modalDescription.textContent = issue.description;
-    if (modalStatus) {
-      modalStatus.innerHTML = `
-        <span class="px-2 py-1 rounded-lg text-xs font-semibold ${
-          issue.status === 'open' ? 'bg-green-100 text-green-700' : 'bg-purple-100 text-purple-700'
-        }">
-          ${issue.status === 'open' ? '● Open' : '✓ Closed'}
-        </span>
-      `;
-    }
-    if (modalAuthor) modalAuthor.textContent = `@${issue.author}`;
-    if (modalDate) modalDate.textContent = `opened on ${issue.createdAt}`;
-    if (modalCommentCount) modalCommentCount.textContent = String(issue.comments?.length || 0);
-
-    if (modalLabels) {
-      modalLabels.innerHTML = issue.labels.map(label => `
-        <span class="px-3 py-1 rounded-full text-xs font-medium ${getLabelClass(label)}">${label}</span>
-      `).join('');
-    }
-
-    const commentsContainer = document.getElementById('commentsContainer');
-    if (commentsContainer) {
-      if (issue.comments && issue.comments.length > 0) {
-        commentsContainer.innerHTML = issue.comments.map(comment => `
-          <div class="bg-slate-50 dark:bg-slate-800 rounded-lg p-4">
-            <div class="flex items-center gap-2 mb-2">
-              <span class="font-semibold text-sm text-slate-900 dark:text-slate-100">@${comment.author}</span>
-              <span class="text-xs text-slate-500 dark:text-slate-400">${comment.date}</span>
-            </div>
-            <p class="text-slate-700 dark:text-slate-300">${comment.text}</p>
-          </div>
-        `).join('');
-      } else {
-        commentsContainer.innerHTML = '<p class="text-slate-500 dark:text-slate-400 text-sm">No comments yet</p>';
-      }
-    }
-
-    const issueModal = document.getElementById('issueModal');
-    if (issueModal) {
-      issueModal.classList.remove('hidden');
-      document.body.style.overflow = 'hidden';
-    }
-  }
-
-  function closeIssueModal() {
-    const issueModal = document.getElementById('issueModal');
-    if (issueModal) {
-      issueModal.classList.add('hidden');
-      document.body.style.overflow = 'auto';
-    }
-  }
-
-  // Tab switching
-  const openTab = document.getElementById('openTab');
-  const closedTab = document.getElementById('closedTab');
-  const openIssuesContainer = document.getElementById('openIssues');
-  const closedIssuesContainer = document.getElementById('closedIssues');
-
-  openTab?.addEventListener('click', () => {
-    openTab.classList.add('active');
-    closedTab?.classList.remove('active');
-    openIssuesContainer?.classList.remove('hidden');
-    closedIssuesContainer?.classList.add('hidden');
-  });
-
-  closedTab?.addEventListener('click', () => {
-    closedTab.classList.add('active');
-    openTab?.classList.remove('active');
-    closedIssuesContainer?.classList.remove('hidden');
-    openIssuesContainer?.classList.add('hidden');
-  });
-
-  // New issue form
-  const newIssueBtn = document.getElementById('newIssueBtn');
-  const newIssueForm = document.getElementById('newIssueForm');
-  const cancelIssueBtn = document.getElementById('cancelIssueBtn');
-  const issueForm = document.getElementById('issueForm');
-
-  newIssueBtn?.addEventListener('click', () => {
-    newIssueForm?.classList.remove('hidden');
-    newIssueForm?.scrollIntoView({ behavior: 'smooth' });
-  });
-
-  cancelIssueBtn?.addEventListener('click', () => {
-    newIssueForm?.classList.add('hidden');
-    if (issueForm && issueForm.reset) issueForm.reset();
-    selectedLabels.clear();
-    document.querySelectorAll('.label-btn').forEach(btn => {
-      btn.classList.remove('bg-blue-100', 'border-blue-500', 'text-blue-700');
-    });
-  });
-
-  // Label selection
-  document.querySelectorAll('.label-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const label = btn.getAttribute('data-label');
-      if (label && selectedLabels.has(label)) {
-        selectedLabels.delete(label);
-        btn.classList.remove('bg-blue-100', 'border-blue-500', 'text-blue-700');
-      } else if (label) {
-        selectedLabels.add(label);
-        btn.classList.add('bg-blue-100', 'border-blue-500', 'text-blue-700');
-      }
-    });
-  });
-
-  // Form submission
-  issueForm?.addEventListener('submit', (e) => {
-    e.preventDefault();
-
-    const titleEl = document.getElementById('issueTitle');
-    const descriptionEl = document.getElementById('issueDescription');
-
-    if (!titleEl || !descriptionEl) return;
-
-    const title = titleEl.value;
-    const description = descriptionEl.value;
-
-    const newIssue = {
-      id: nextId++,
-      title,
-      description,
-      status: 'open',
-      labels: Array.from(selectedLabels),
-      author: 'You',
-      comments: [],
-      createdAt: new Date().toISOString().split('T')[0],
-    };
-
-    issues.unshift(newIssue);
-    renderIssues();
-
-    newIssueForm?.classList.add('hidden');
-    if (issueForm && issueForm.reset) issueForm.reset();
-    selectedLabels.clear();
-    document.querySelectorAll('.label-btn').forEach(btn => {
-      btn.classList.remove('bg-blue-100', 'border-blue-500', 'text-blue-700');
-    });
-
-    // Show success message
-    alert('Issue created successfully!');
-  });
-
-  // Close modal
-  document.getElementById('closeModal')?.addEventListener('click', closeIssueModal);
-  document.getElementById('issueModal')?.addEventListener('click', (e) => {
-    if (e.target && e.target.id === 'issueModal') {
-      closeIssueModal();
-    }
-  });
-
-  // Initial render
-  renderIssues();
-</script>
-
 <style>
-  .tab-button {
-    color: #64748b;
+  @keyframes blob {
+    0%, 100% {
+      transform: translate(0, 0) scale(1);
+    }
+    33% {
+      transform: translate(30px, -50px) scale(1.1);
+    }
+    66% {
+      transform: translate(-20px, 20px) scale(0.9);
+    }
   }
-  .dark .tab-button {
-    color: #94a3b8;
+
+  .animate-blob {
+    animation: blob 7s infinite;
   }
-  .tab-button.active {
-    background-color: #f1f5f9;
-    color: #0f172a;
+
+  .animation-delay-2000 {
+    animation-delay: 2s;
   }
-  .dark .tab-button.active {
-    background-color: #334155;
-    color: #f1f5f9;
-  }
-  .tab-button:hover:not(.active) {
-    background-color: #f8fafc;
-  }
-  .dark .tab-button:hover:not(.active) {
-    background-color: #1e293b;
+
+  .animation-delay-4000 {
+    animation-delay: 4s;
   }
 </style>

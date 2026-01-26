@@ -1,260 +1,265 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Navigation from '../components/Navigation.astro';
+import { APP_CONFIG, FEATURES, PLATFORMS, TECH_STACK, APP_STATS } from '../config/constants';
 
-export const prerender = false; // Need server-side rendering for session
+export const prerender = false;
 
-const session = Astro.locals.session;
+const user = Astro.locals.user;
 ---
 
-<Layout title="StudyBible - Native Bible Study Application">
+<Layout title={`${APP_CONFIG.NAME} - ${APP_CONFIG.TAGLINE}`}>
   <Navigation currentPage="home" />
 
-  <main>
-    <!-- Compact Hero Section -->
-    <section class="relative overflow-hidden py-12 px-6">
-      <div class="max-w-6xl mx-auto text-center">
-        <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl shadow-xl mb-6">
-          <span class="text-4xl">📖</span>
+  <main class="relative">
+    <!-- Hero Section -->
+    <section class="relative pt-20 pb-32 px-6 overflow-hidden">
+      <div class="max-w-7xl mx-auto text-center relative z-10">
+        <!-- Coming Soon Badge -->
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-800 text-blue-600 dark:text-blue-400 text-xs font-bold tracking-wider uppercase mb-8 animate-fade-in">
+          <span class="relative flex h-2 w-2">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+          </span>
+          {APP_CONFIG.STATUS} • {APP_CONFIG.VERSION}
         </div>
 
-        <h1 class="font-display text-5xl md:text-6xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent mb-3">
-          StudyBible
+        <div class="flex justify-center mb-8">
+          <div class="relative group">
+            <div class="absolute -inset-1 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-3xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+            <div class="relative flex items-center justify-center w-24 h-24 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl ring-1 ring-slate-200 dark:ring-slate-800 transition-transform hover:scale-105 duration-300">
+              <span class="text-5xl">{APP_CONFIG.ICON}</span>
+            </div>
+          </div>
+        </div>
+
+        <h1 class="font-display text-6xl md:text-7xl lg:text-8xl font-extrabold tracking-tight mb-6">
+          <span class="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
+            {APP_CONFIG.NAME}
+          </span>
         </h1>
-        <p class="text-lg text-slate-600 dark:text-slate-300 mb-2 max-w-2xl mx-auto">
-          Native Bible study application built with Rust
+        
+        <p class="text-xl md:text-2xl text-slate-600 dark:text-slate-300 mb-4 max-w-3xl mx-auto leading-relaxed font-medium">
+          {APP_CONFIG.DESCRIPTION}
         </p>
-        <p class="text-slate-500 dark:text-slate-400 mb-6 max-w-xl mx-auto">
-          1000+ translations · Parallel view · Fast & offline
+        <p class="text-lg text-slate-500 dark:text-slate-400 mb-10 max-w-2xl mx-auto">
+          {APP_CONFIG.TAGLINE}
         </p>
 
-        <div class="flex flex-wrap gap-3 justify-center mb-8">
-          <a href="#download" class="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all">
-            Download Now →
+        <div class="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
+          <a href="#download" class="w-full sm:w-auto px-8 py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold rounded-xl shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-300">
+            Get Notified
           </a>
-          <a href="/feedback" class="px-6 py-2.5 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-semibold rounded-lg shadow-md hover:shadow-lg transition-all border border-slate-200 dark:border-slate-700">
-            Give Feedback
+          <a href="/feedback" class="w-full sm:w-auto px-8 py-4 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-bold rounded-xl shadow-md hover:shadow-lg hover:-translate-y-1 transition-all duration-300 border border-slate-200 dark:border-slate-700">
+            View Project Status
           </a>
         </div>
 
-        <!-- Compact Stats -->
-        <div class="flex flex-wrap gap-4 justify-center text-sm">
-          <div class="px-4 py-2 bg-white/60 backdrop-blur-sm rounded-lg border border-white">
-            <span class="font-bold text-blue-600">1000+</span> Translations
-          </div>
-          <div class="px-4 py-2 bg-white/60 backdrop-blur-sm rounded-lg border border-white">
-            <span class="font-bold text-indigo-600">66</span> Books
-          </div>
-          <div class="px-4 py-2 bg-white/60 backdrop-blur-sm rounded-lg border border-white">
-            <span class="font-bold text-purple-600">4</span> Platforms
-          </div>
-          <div class="px-4 py-2 bg-white/60 backdrop-blur-sm rounded-lg border border-white">
-            <span class="font-bold text-pink-600">100%</span> Free
-          </div>
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-8 max-w-4xl mx-auto">
+          {Object.entries(APP_STATS).map(([key, value]) => (
+            <div class="p-6 bg-white/40 dark:bg-slate-800/40 backdrop-blur-md rounded-2xl border border-white/20 dark:border-slate-700/30 transition-transform hover:scale-105 duration-300">
+              <div class="text-2xl md:text-3xl font-black text-slate-900 dark:text-white mb-1">{value}</div>
+              <div class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">{key}</div>
+            </div>
+          ))}
         </div>
       </div>
 
-      <!-- Decorative blobs -->
-      <div class="absolute top-10 left-10 w-64 h-64 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
-      <div class="absolute top-20 right-10 w-64 h-64 bg-purple-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
+      <!-- Decorative Background Elements -->
+      <div class="absolute top-1/4 -left-20 w-96 h-96 bg-blue-400/20 rounded-full mix-blend-multiply filter blur-[100px] animate-blob"></div>
+      <div class="absolute top-1/3 -right-20 w-96 h-96 bg-purple-400/20 rounded-full mix-blend-multiply filter blur-[100px] animate-blob animation-delay-2000"></div>
+      <div class="absolute -bottom-20 left-1/2 -translate-x-1/2 w-[800px] h-96 bg-indigo-500/10 rounded-full mix-blend-multiply filter blur-[100px] animate-blob animation-delay-4000"></div>
     </section>
 
-    <!-- Compact Features Section -->
-    <section id="features" class="py-12 px-6 bg-white/40 dark:bg-slate-800/40 backdrop-blur-sm">
-      <div class="max-w-6xl mx-auto">
-        <div class="text-center mb-8">
-          <h2 class="font-display text-3xl font-bold text-slate-800 dark:text-slate-100 mb-2">Key Features</h2>
-          <p class="text-slate-600 dark:text-slate-300">Everything you need for Bible study</p>
+    <!-- App Showcase Section -->
+    <section class="py-32 px-6 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-950 dark:via-blue-950/30 dark:to-indigo-950/30 overflow-hidden relative">
+      <!-- Decorative Background Elements -->
+      <div class="absolute top-0 left-1/4 w-96 h-96 bg-blue-400/20 rounded-full mix-blend-multiply filter blur-[120px] animate-blob"></div>
+      <div class="absolute bottom-0 right-1/4 w-96 h-96 bg-indigo-400/20 rounded-full mix-blend-multiply filter blur-[120px] animate-blob animation-delay-2000"></div>
+      
+      <div class="max-w-7xl mx-auto relative z-10">
+        <!-- Image Container with Floating Effect -->
+        <div class="relative group">
+          <!-- Glow Effect -->
+          <div class="absolute -inset-4 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-3xl blur-2xl opacity-20 group-hover:opacity-30 transition duration-1000"></div>
+          
+          <!-- Image -->
+          <div class="relative bg-white/50 dark:bg-slate-900/50 backdrop-blur-xl rounded-2xl p-4 md:p-8 shadow-2xl border border-white/20 dark:border-slate-800/50 overflow-hidden">
+            <img 
+              src="/gallery/multi_device.png" 
+              alt="StudyBible app showcased across laptop, tablet, and mobile devices"
+              class="w-full h-auto rounded-xl shadow-lg transform transition-transform duration-700 group-hover:scale-[1.02]"
+              loading="lazy"
+            />
+          </div>
         </div>
-
-        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div class="p-5 bg-white dark:bg-slate-900 rounded-xl shadow-md border border-slate-100 dark:border-slate-700 hover:shadow-lg transition-shadow">
-            <div class="flex items-start gap-3">
-              <span class="text-2xl">🌍</span>
-              <div>
-                <h3 class="font-bold text-slate-800 dark:text-slate-100 mb-1">1000+ Translations</h3>
-                <p class="text-sm text-slate-600 dark:text-slate-400">100+ languages with offline support</p>
-              </div>
-            </div>
-          </div>
-
-          <div class="p-5 bg-white dark:bg-slate-900 rounded-xl shadow-md border border-slate-100 dark:border-slate-700 hover:shadow-lg transition-shadow">
-            <div class="flex items-start gap-3">
-              <span class="text-2xl">↔️</span>
-              <div>
-                <h3 class="font-bold text-slate-800 dark:text-slate-100 mb-1">Parallel View</h3>
-                <p class="text-sm text-slate-600 dark:text-slate-400">Compare translations side-by-side</p>
-              </div>
-            </div>
-          </div>
-
-          <div class="p-5 bg-white dark:bg-slate-900 rounded-xl shadow-md border border-slate-100 dark:border-slate-700 hover:shadow-lg transition-shadow">
-            <div class="flex items-start gap-3">
-              <span class="text-2xl">🔍</span>
-              <div>
-                <h3 class="font-bold text-slate-800 dark:text-slate-100 mb-1">Smart Search</h3>
-                <p class="text-sm text-slate-600 dark:text-slate-400">Find verses instantly across translations</p>
-              </div>
-            </div>
-          </div>
-
-          <div class="p-5 bg-white dark:bg-slate-900 rounded-xl shadow-md border border-slate-100 dark:border-slate-700 hover:shadow-lg transition-shadow">
-            <div class="flex items-start gap-3">
-              <span class="text-2xl">🔖</span>
-              <div>
-                <h3 class="font-bold text-slate-800 dark:text-slate-100 mb-1">Bookmarks & Notes</h3>
-                <p class="text-sm text-slate-600 dark:text-slate-400">Save verses with personal annotations</p>
-              </div>
-            </div>
-          </div>
-
-          <div class="p-5 bg-white dark:bg-slate-900 rounded-xl shadow-md border border-slate-100 dark:border-slate-700 hover:shadow-lg transition-shadow">
-            <div class="flex items-start gap-3">
-              <span class="text-2xl">🎨</span>
-              <div>
-                <h3 class="font-bold text-slate-800 dark:text-slate-100 mb-1">Dark Mode</h3>
-                <p class="text-sm text-slate-600 dark:text-slate-400">Beautiful themes for any lighting</p>
-              </div>
-            </div>
-          </div>
-
-          <div class="p-5 bg-white dark:bg-slate-900 rounded-xl shadow-md border border-slate-100 dark:border-slate-700 hover:shadow-lg transition-shadow">
-            <div class="flex items-start gap-3">
-              <span class="text-2xl">⚡</span>
-              <div>
-                <h3 class="font-bold text-slate-800 dark:text-slate-100 mb-1">Native Performance</h3>
-                <p class="text-sm text-slate-600 dark:text-slate-400">Built with Rust for blazing speed</p>
-              </div>
-            </div>
-          </div>
+        
+        <!-- Caption -->
+        <div class="text-center mt-12 max-w-3xl mx-auto">
+          <p class="text-lg md:text-xl text-slate-600 dark:text-slate-300 font-medium leading-relaxed">
+            Experience seamless Bible study across all your devices with a beautiful, native interface
+          </p>
         </div>
       </div>
     </section>
 
-    <!-- Download Section -->
-    <section id="download" class="py-12 px-6 bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600">
-      <div class="max-w-6xl mx-auto text-center">
-        <h2 class="font-display text-3xl font-bold text-white mb-2">Download StudyBible</h2>
-        <p class="text-blue-100 mb-8">Available for all major platforms</p>
-
-        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-4xl mx-auto">
-          <div class="p-6 bg-white/10 backdrop-blur-md rounded-xl border border-white/20 hover:bg-white/20 transition-all text-center group cursor-pointer">
-            <div class="text-4xl mb-2">🪟</div>
-            <h3 class="text-lg font-bold text-white mb-1">Windows</h3>
-            <p class="text-blue-100 text-sm">Windows 10+</p>
-          </div>
-
-          <div class="p-6 bg-white/10 backdrop-blur-md rounded-xl border border-white/20 hover:bg-white/20 transition-all text-center group cursor-pointer">
-            <div class="text-4xl mb-2">🍎</div>
-            <h3 class="text-lg font-bold text-white mb-1">macOS</h3>
-            <p class="text-blue-100 text-sm">macOS 10.15+</p>
-          </div>
-
-          <div class="p-6 bg-white/10 backdrop-blur-md rounded-xl border border-white/20 hover:bg-white/20 transition-all text-center group cursor-pointer">
-            <div class="text-4xl mb-2">🐧</div>
-            <h3 class="text-lg font-bold text-white mb-1">Linux</h3>
-            <p class="text-blue-100 text-sm">All distributions</p>
-          </div>
-
-          <div class="p-6 bg-white/10 backdrop-blur-md rounded-xl border border-white/20 hover:bg-white/20 transition-all text-center group cursor-pointer">
-            <div class="text-4xl mb-2">🤖</div>
-            <h3 class="text-lg font-bold text-white mb-1">Android</h3>
-            <p class="text-blue-100 text-sm">Coming Soon</p>
-          </div>
+    <!-- Designed for Serious Students Section -->
+    <section id="features" class="py-24 px-6 relative bg-white dark:bg-slate-950">
+      <div class="max-w-7xl mx-auto relative z-10">
+        <div class="text-center mb-20">
+          <h2 class="font-display text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-4 tracking-tight">
+            Designed for the <span class="text-blue-600 italic">Serious Student</span>
+          </h2>
+          <p class="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
+            Everything you need for a deep, focused Bible study experience, all in one fast, native application.
+          </p>
         </div>
 
-        <p class="text-blue-100 mt-6 text-sm">
-          Completely free to download and use
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {FEATURES.map(feature => (
+            <div class="group p-8 bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-800 hover:shadow-2xl hover:border-blue-100 dark:hover:border-blue-900/30 transition-all duration-500 hover:-translate-y-2">
+              <div class="w-14 h-14 bg-slate-50 dark:bg-slate-800 rounded-2xl flex items-center justify-center text-3xl mb-6 group-hover:scale-110 group-hover:bg-blue-50 dark:group-hover:bg-blue-900/20 transition-all duration-500">
+                {feature.icon}
+              </div>
+              <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-3">{feature.title}</h3>
+              <p class="text-slate-600 dark:text-slate-400 leading-relaxed">{feature.description}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- Download/Coming Soon Section -->
+    <section id="download" class="py-24 px-6 relative overflow-hidden bg-slate-50 dark:bg-slate-950">
+      <div class="max-w-7xl mx-auto relative z-10 text-center">
+        <h2 class="font-display text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-6">Download Now or Get Notified</h2>
+        <p class="text-lg text-slate-600 dark:text-slate-400 mb-8 max-w-2xl mx-auto">
+          We're bringing PureStream's StudyBible to every platform.
         </p>
-      </div>
-    </section>
-
-    <!-- Tech Stack - Compact -->
-    <section class="py-12 px-6 bg-slate-50 dark:bg-slate-900">
-      <div class="max-w-6xl mx-auto">
-        <div class="text-center mb-8">
-          <h2 class="font-display text-3xl font-bold text-slate-800 dark:text-slate-100 mb-2">Built with Modern Tech</h2>
-          <p class="text-slate-600 dark:text-slate-300">Powered by cutting-edge frameworks</p>
+        
+        <!-- EVALUATION NOTICE - VERY PROMINENT -->
+        <div class="max-w-4xl mx-auto mb-12 p-6 bg-amber-50 dark:bg-amber-900/20 border-4 border-amber-400 dark:border-amber-600 rounded-2xl shadow-xl">
+          <div class="flex items-start gap-4">
+            <span class="text-4xl">⚠️</span>
+            <div class="flex-1">
+              <h3 class="text-xl md:text-2xl font-black text-amber-900 dark:text-amber-200 mb-3">EVALUATION BUILD - NOT FOR PRODUCTION USE</h3>
+              <p class="text-base md:text-lg font-bold text-amber-800 dark:text-amber-300 leading-relaxed">
+                {APP_CONFIG.EVALUATION_NOTICE}
+              </p>
+            </div>
+          </div>
         </div>
 
-        <div class="flex flex-wrap gap-4 justify-center items-center">
-          <div class="flex items-center gap-3 px-6 py-4 bg-white dark:bg-slate-800 rounded-xl shadow-md">
-            <div class="w-12 h-12 bg-orange-100 dark:bg-orange-900/30 rounded-lg flex items-center justify-center">
-              <span class="text-2xl">🦀</span>
-            </div>
-            <div class="text-left">
-              <div class="font-bold text-slate-800 dark:text-slate-100">Rust</div>
-              <div class="text-xs text-slate-500 dark:text-slate-400">Performance & Safety</div>
-            </div>
+        <!-- Available Platforms -->
+        <div class="mb-16">
+          <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-6">Available Now</h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-8">
+            {PLATFORMS.filter(p => p.status === 'Available').map(platform => (
+              <a 
+                href={platform.downloadUrl} 
+                target="_blank"
+                rel="noopener noreferrer"
+                class="relative group p-8 bg-white dark:bg-slate-900 rounded-3xl border-2 border-green-200 dark:border-green-800 hover:shadow-2xl hover:border-green-400 dark:hover:border-green-600 transition-all duration-500 hover:-translate-y-2"
+              >
+                <div class="absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-black uppercase tracking-tight bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-400 border border-green-300 dark:border-green-700">
+                  {platform.status}
+                </div>
+                <div class="text-5xl mb-6 group-hover:scale-110 transition-transform duration-500">{platform.icon}</div>
+                <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">{platform.name}</h3>
+                <p class="text-sm text-slate-500 dark:text-slate-400 font-medium mb-4">{platform.requirement}</p>
+                <div class="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-semibold">
+                  <span>Download</span>
+                  <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                  </svg>
+                </div>
+              </a>
+            ))}
           </div>
+        </div>
 
-          <div class="flex items-center gap-3 px-6 py-4 bg-white dark:bg-slate-800 rounded-xl shadow-md">
-            <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
-              <span class="text-lg font-bold text-purple-600 dark:text-purple-400">Dx</span>
-            </div>
-            <div class="text-left">
-              <div class="font-bold text-slate-800 dark:text-slate-100">Dioxus</div>
-              <div class="text-xs text-slate-500 dark:text-slate-400">Reactive UI</div>
-            </div>
+        <!-- Coming Soon Platforms -->
+        <div class="mb-16">
+          <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-6">Coming Soon</h3>
+          <div class="grid grid-cols-2 lg:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            {PLATFORMS.filter(p => p.status === 'Coming Soon').map(platform => (
+              <div class="relative group p-8 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 hover:shadow-xl transition-all duration-500 hover:-translate-y-1 opacity-75">
+                <div class="absolute top-4 right-4 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-tighter bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
+                  {platform.status}
+                </div>
+                <div class="text-5xl mb-6 group-hover:scale-110 transition-transform duration-500">{platform.icon}</div>
+                <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-1">{platform.name}</h3>
+                <p class="text-sm text-slate-500 dark:text-slate-400 font-medium">{platform.requirement}</p>
+              </div>
+            ))}
           </div>
+        </div>
 
-          <div class="flex items-center gap-3 px-6 py-4 bg-white dark:bg-slate-800 rounded-xl shadow-md">
-            <div class="w-12 h-12 bg-sky-100 dark:bg-sky-900/30 rounded-lg flex items-center justify-center">
-              <span class="text-2xl text-sky-500 dark:text-sky-400">🎨</span>
-            </div>
-            <div class="text-left">
-              <div class="font-bold text-slate-800 dark:text-slate-100">Tailwind</div>
-              <div class="text-xs text-slate-500 dark:text-slate-400">Modern Styling</div>
-            </div>
-          </div>
-
-          <div class="flex items-center gap-3 px-6 py-4 bg-white dark:bg-slate-800 rounded-xl shadow-md">
-            <div class="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
-              <span class="text-2xl">⚡</span>
-            </div>
-            <div class="text-left">
-              <div class="font-bold text-slate-800 dark:text-slate-100">Tokio</div>
-              <div class="text-xs text-slate-500 dark:text-slate-400">Async Runtime</div>
-            </div>
-          </div>
+        <!-- Notify Form Placeholder -->
+        <div class="max-w-md mx-auto">
+          <form class="flex flex-col sm:flex-row gap-3">
+            <input 
+              type="email" 
+              placeholder="Enter your email" 
+              class="flex-1 px-5 py-4 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-blue-500 outline-none transition-all dark:text-white"
+            />
+            <button class="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg transition-all">
+              Notify Me
+            </button>
+          </form>
+          <p class="mt-4 text-xs text-slate-500 dark:text-slate-500">
+            No spam, just a single email when we launch.
+          </p>
         </div>
       </div>
     </section>
 
     <!-- Footer -->
-    <footer class="py-8 px-6 bg-slate-900 dark:bg-black">
-      <div class="max-w-6xl mx-auto text-center">
-        <div class="text-3xl mb-3">📖</div>
-        <h3 class="text-xl font-bold text-white mb-2">StudyBible</h3>
-        <div class="flex gap-6 justify-center mb-4 text-sm">
-          <a href="/feedback" class="text-slate-400 dark:text-slate-500 hover:text-white transition-colors">Feedback</a>
-          <a href="#features" class="text-slate-400 dark:text-slate-500 hover:text-white transition-colors">Features</a>
-          <a href="#download" class="text-slate-400 dark:text-slate-500 hover:text-white transition-colors">Download</a>
+    <footer class="py-16 px-6 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-950">
+      <div class="max-w-7xl mx-auto">
+        <div class="flex flex-col md:flex-row justify-between items-center gap-10">
+          <div class="flex items-center gap-3">
+            <span class="text-3xl">{APP_CONFIG.ICON}</span>
+            <span class="font-display text-2xl font-black bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+              {APP_CONFIG.NAME}
+            </span>
+          </div>
+
+          <div class="flex flex-wrap gap-x-10 gap-y-4 justify-center text-sm font-semibold text-slate-500 dark:text-slate-400">
+            <a href="#features" class="hover:text-blue-600 transition-colors">Features</a>
+            <a href="#download" class="hover:text-blue-600 transition-colors">Platforms</a>
+            <a href="/feedback" class="hover:text-blue-600 transition-colors">Feedback</a>
+            <a href={APP_CONFIG.GITHUB_URL} target="_blank" class="hover:text-blue-600 transition-colors">GitHub</a>
+          </div>
+
+          <div class="text-slate-400 dark:text-slate-600 text-sm">
+            &copy; {new Date().getFullYear()} {APP_CONFIG.NAME}. Built with Rust.
+          </div>
         </div>
-        <p class="text-slate-500 dark:text-slate-600 text-sm">Built with ❤️ using Rust and Dioxus</p>
       </div>
     </footer>
   </main>
 </Layout>
 
 <script>
+
   import { initTheme, setupThemeToggle } from '../scripts/theme';
 
+
+
   // Initialize theme immediately to prevent flash
+
   initTheme();
 
-  // Setup theme toggle when DOM is ready
-  document.addEventListener('DOMContentLoaded', () => {
-    setupThemeToggle();
-  });
-</script>
 
-<style>
-  @keyframes blob {
-    0%, 100% { transform: translate(0, 0) scale(1); }
-    33% { transform: translate(30px, -50px) scale(1.1); }
-    66% { transform: translate(-20px, 20px) scale(0.9); }
-  }
-  .animate-blob { animation: blob 7s infinite; }
-  .animation-delay-2000 { animation-delay: 2s; }
-</style>
+
+  // Setup theme toggle when DOM is ready
+
+  document.addEventListener('DOMContentLoaded', () => {
+
+    setupThemeToggle();
+
+  });
+
+</script>
