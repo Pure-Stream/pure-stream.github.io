@@ -2,7 +2,7 @@
 import { APP_CONFIG } from '../config/constants';
 
 interface Props {
-  currentPage?: 'home' | 'feedback' | 'about' | 'contact' | 'features';
+  currentPage?: 'home' | 'feedback' | 'about' | 'guide';
   showThemeToggle?: boolean;
 }
 
@@ -45,13 +45,13 @@ const { currentPage = 'home', showThemeToggle = true } = Astro.props;
           About
         </a>
         <a
-          href="/contact"
-          class={currentPage === 'contact'
+          href="/guide"
+          class={currentPage === 'guide'
             ? 'text-blue-600 dark:text-blue-400 font-medium'
             : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-medium transition-colors'
           }
         >
-          Contact
+          Guide
         </a>
         <a
           href="/feedback"
@@ -126,7 +126,7 @@ const { currentPage = 'home', showThemeToggle = true } = Astro.props;
       <a href="/#features" class="block px-3 py-3 rounded-lg text-base font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">Features</a>
       <a href="/#download" class="block px-3 py-3 rounded-lg text-base font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">Download</a>
       <a href="/about" class="block px-3 py-3 rounded-lg text-base font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">About</a>
-      <a href="/contact" class="block px-3 py-3 rounded-lg text-base font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">Contact</a>
+      <a href="/guide" class="block px-3 py-3 rounded-lg text-base font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">Guide</a>
       <a href="/feedback" class="block px-3 py-3 rounded-lg text-base font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">Feedback</a>
       <div class="pt-4 mt-2 border-t border-slate-100 dark:border-slate-800">
         <a href={APP_CONFIG.GITHUB_URL} target="_blank" rel="noopener noreferrer" class="block w-full text-center px-4 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-xl">GitHub</a>
