@@ -6,37 +6,12 @@
 // Route paths
 export const ROUTES = {
   HOME: '/',
-  LOGIN: '/login',
-  SIGNUP: '/signup',
-  DASHBOARD: '/dashboard',
+  ABOUT: '/about',
+  CONTACT: '/contact',
+  FEATURES: '/features',
   FEEDBACK: '/feedback',
-  PROFILE: '/profile',
-  FORGOT_PASSWORD: '/forgot-password',
   TERMS: '/terms',
   PRIVACY: '/privacy',
-} as const;
-
-// API endpoints
-export const API_ROUTES = {
-  SIGNUP: '/api/auth/signup',
-  SIGNIN: '/api/auth/signin',
-  SIGNOUT: '/api/auth/signout',
-  GOOGLE_SIGNIN: '/api/auth/signin/google',
-  GITHUB_SIGNIN: '/api/auth/signin/github',
-  CALLBACK_CREDENTIALS: '/api/auth/signin/credentials',
-} as const;
-
-// Protected routes that require authentication
-export const PROTECTED_ROUTES = [
-  ROUTES.DASHBOARD,
-  ROUTES.PROFILE,
-] as const;
-
-// Authentication configuration
-export const AUTH_CONFIG = {
-  MIN_PASSWORD_LENGTH: 8,
-  MAX_PASSWORD_LENGTH: 128,
-  SESSION_MAX_AGE: 30 * 24 * 60 * 60, // 30 days in seconds
 } as const;
 
 // Application metadata
@@ -123,4 +98,3 @@ export const THEME_CONFIG = {
 // Type exports for better TypeScript support
 export type RouteKey = keyof typeof ROUTES;
 export type Route = typeof ROUTES[RouteKey];
-export type ProtectedRoute = typeof PROTECTED_ROUTES[number];

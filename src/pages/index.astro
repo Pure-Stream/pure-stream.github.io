@@ -2,10 +2,6 @@
 import Layout from '../layouts/Layout.astro';
 import Navigation from '../components/Navigation.astro';
 import { APP_CONFIG, FEATURES, PLATFORMS, TECH_STACK, APP_STATS } from '../config/constants';
-
-export const prerender = false;
-
-const user = Astro.locals.user;
 ---
 
 <Layout title={`${APP_CONFIG.NAME} - ${APP_CONFIG.TAGLINE}`}>
