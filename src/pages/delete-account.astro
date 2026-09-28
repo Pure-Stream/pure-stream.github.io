@@ -1,0 +1,137 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Navigation from '../components/Navigation.astro';
+---
+
+<Layout title="Delete your StudyBible account - PureStream">
+  <Navigation currentPage="delete-account" />
+  <main class="min-h-screen bg-slate-50 dark:bg-slate-950 px-6 py-12">
+    <article class="max-w-2xl mx-auto rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-6 sm:p-10 shadow-sm">
+      <h1 class="text-3xl font-bold text-slate-900 dark:text-white mb-4">Delete your StudyBible account</h1>
+      <p class="text-slate-700 dark:text-slate-300 mb-6">
+        This page lets you permanently delete your PureStream StudyBible account even if you no longer have the app.
+      </p>
+
+      <h2 class="text-xl font-semibold text-slate-900 dark:text-white mb-2">What deletion removes</h2>
+      <ul class="list-disc pl-6 text-slate-700 dark:text-slate-300 space-y-2 mb-6">
+        <li>Your StudyBible sign-in account, including its email address and linked sign-in identities.</li>
+        <li>Bookmarks, highlights, and bookmark notes synced to StudyBible's server.</li>
+      </ul>
+      <p class="text-slate-700 dark:text-slate-300 mb-6">
+        Deletion takes effect after you confirm it below. Data saved only on a device is not reachable from this website. In the app, use Settings → Clear Local Data on any device where you want to remove local copies. The app's in-app Delete Account action also clears local data on that device.
+      </p>
+
+      <h2 class="text-xl font-semibold text-slate-900 dark:text-white mb-2">Verify your account</h2>
+      <p class="text-slate-700 dark:text-slate-300 mb-5">
+        Sign in using your StudyBible email and password, or request an email sign-in link. The link works for an existing account and will not create a new one. If you used Google to create your account, use the email address associated with Google.
+      </p>
+
+      <div id="signed-out" class="space-y-4">
+        <form id="password-form" class="space-y-3">
+          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300" for="email">Email address</label>
+          <input id="email" name="email" type="email" autocomplete="email" required class="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-4 py-3" />
+          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300" for="password">Password (if you have one)</label>
+          <input id="password" name="password" type="password" autocomplete="current-password" class="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-4 py-3" />
+          <div class="flex flex-wrap gap-3">
+            <button type="submit" class="rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-3">Sign in with password</button>
+            <button id="email-link" type="button" class="rounded-lg border border-indigo-600 text-indigo-700 dark:text-indigo-300 font-semibold px-5 py-3">Email me a sign-in link</button>
+          </div>
+        </form>
+      </div>
+
+      <div id="signed-in" class="hidden space-y-4">
+        <p class="text-slate-700 dark:text-slate-300">Signed in as <strong id="signed-in-email"></strong>.</p>
+        <label class="flex items-start gap-3 text-slate-700 dark:text-slate-300">
+          <input id="confirm-deletion" type="checkbox" class="mt-1" />
+          <span>I understand that deleting this StudyBible account and its synced data cannot be undone.</span>
+        </label>
+        <div class="flex flex-wrap gap-3">
+          <button id="delete-account" type="button" disabled class="rounded-lg bg-red-700 hover:bg-red-800 disabled:opacity-50 text-white font-semibold px-5 py-3">Permanently delete account</button>
+          <button id="sign-out" type="button" class="rounded-lg border border-slate-400 text-slate-700 dark:text-slate-300 px-5 py-3">Use another account</button>
+        </div>
+      </div>
+
+      <p id="status" role="status" aria-live="polite" class="mt-6 text-slate-700 dark:text-slate-300"></p>
+    </article>
+  </main>
+</Layout>
+
+<script>
+  import { createClient } from '@supabase/supabase-js';
+
+  const status = document.querySelector<HTMLParagraphElement>('#status')!;
+  const signedOut = document.querySelector<HTMLElement>('#signed-out')!;
+  const signedIn = document.querySelector<HTMLElement>('#signed-in')!;
+  const emailInput = document.querySelector<HTMLInputElement>('#email')!;
+  const passwordInput = document.querySelector<HTMLInputElement>('#password')!;
+  const confirmation = document.querySelector<HTMLInputElement>('#confirm-deletion')!;
+  const deleteButton = document.querySelector<HTMLButtonElement>('#delete-account')!;
+
+  const url = import.meta.env.PUBLIC_SUPABASE_URL;
+  const key = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+  if (!url || !key) {
+    signedOut.classList.add('hidden');
+    status.textContent = 'Account deletion is temporarily unavailable. Please try again later.';
+  } else {
+    const client = createClient(url, key, {
+      auth: { flowType: 'pkce', detectSessionInUrl: true },
+    });
+
+    function showUser(user: { email?: string } | null) {
+      signedIn.classList.toggle('hidden', !user);
+      signedOut.classList.toggle('hidden', Boolean(user));
+      document.querySelector<HTMLElement>('#signed-in-email')!.textContent = user?.email ?? '';
+      confirmation.checked = false;
+      deleteButton.disabled = true;
+    }
+
+    client.auth.onAuthStateChange((_event, session) => { showUser(session?.user ?? null); });
+    void client.auth.getUser().then(({ data: { user } }) => showUser(user));
+
+    document.querySelector<HTMLFormElement>('#password-form')!.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      status.textContent = 'Signing in…';
+      const { error } = await client.auth.signInWithPassword({
+        email: emailInput.value.trim(), password: passwordInput.value,
+      });
+      passwordInput.value = '';
+      status.textContent = error ? error.message : 'Signed in. Review the account shown below.';
+      if (!error) {
+        const { data: { user } } = await client.auth.getUser();
+        showUser(user);
+      }
+    });
+
+    document.querySelector<HTMLButtonElement>('#email-link')!.addEventListener('click', async () => {
+      if (!emailInput.reportValidity()) return;
+      status.textContent = 'Requesting a sign-in link…';
+      const { error } = await client.auth.signInWithOtp({
+        email: emailInput.value.trim(),
+        options: { shouldCreateUser: false, emailRedirectTo: window.location.href.split(/[?#]/)[0] },
+      });
+      status.textContent = error ? error.message : 'If this is an existing StudyBible account, check that inbox for a sign-in link.';
+    });
+
+    confirmation.addEventListener('change', () => { deleteButton.disabled = !confirmation.checked; });
+    document.querySelector<HTMLButtonElement>('#sign-out')!.addEventListener('click', async () => {
+      await client.auth.signOut();
+      status.textContent = 'Signed out.';
+      showUser(null);
+    });
+
+    deleteButton.addEventListener('click', async () => {
+      if (!confirmation.checked) return;
+      deleteButton.disabled = true;
+      status.textContent = 'Deleting your account and synced data…';
+      const { error } = await client.functions.invoke('delete-account', { method: 'POST' });
+      if (error) {
+        status.textContent = 'Deletion failed. Please sign in again and retry.';
+        deleteButton.disabled = false;
+        return;
+      }
+      await client.auth.signOut({ scope: 'local' });
+      showUser(null);
+      status.textContent = 'Your StudyBible account and synced data have been deleted.';
+    });
+  }
+</script>
