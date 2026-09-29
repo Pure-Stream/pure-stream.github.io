@@ -1,65 +1,48 @@
 ---
+import PageIntro from '../components/PageIntro.astro';
 import Layout from '../layouts/Layout.astro';
-import Navigation from '../components/Navigation.astro';
 ---
 
-<Layout title="Delete your StudyBible account - PureStream">
-  <Navigation currentPage="delete-account" />
-  <main class="min-h-screen bg-slate-50 dark:bg-slate-950 px-6 py-12">
-    <article class="max-w-2xl mx-auto rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-6 sm:p-10 shadow-sm">
-      <h1 class="text-3xl font-bold text-slate-900 dark:text-white mb-4">Delete your StudyBible account</h1>
-      <p class="text-slate-700 dark:text-slate-300 mb-6">
-        This page lets you permanently delete your PureStream StudyBible account even if you no longer have the app.
-      </p>
+<Layout title="Delete your StudyBible account — PureStream" active="delete-account">
+  <main>
+    <PageIntro eyebrow="Account & privacy" title="Delete your account" intro="You can permanently remove your StudyBible account and synced study data here, even if you no longer have the app." />
 
-      <h2 class="text-xl font-semibold text-slate-900 dark:text-white mb-2">What deletion removes</h2>
-      <ul class="list-disc pl-6 text-slate-700 dark:text-slate-300 space-y-2 mb-6">
-        <li>Your StudyBible sign-in account, including its email address and linked sign-in identities.</li>
-        <li>Bookmarks, highlights, and bookmark notes synced to StudyBible's server.</li>
-      </ul>
-      <p class="text-slate-700 dark:text-slate-300 mb-6">
-        Deletion takes effect after you confirm it below. Data saved only on a device is not reachable from this website. In the app, use Settings → Clear Local Data on any device where you want to remove local copies. The app's in-app Delete Account action also clears local data on that device.
-      </p>
-      <p class="text-slate-700 dark:text-slate-300 mb-6">
-        StudyBible does not keep the deleted account or synced content in active storage. If database backups are enabled, residual copies may remain for up to 30 days under Supabase's standard backup retention periods.
-      </p>
-      <p class="text-slate-700 dark:text-slate-300 mb-6">
-        See the <a class="text-blue-600 dark:text-blue-400 underline" href="/privacy/">StudyBible Privacy Policy</a> for more about how we handle data.
-      </p>
+    <section class="section">
+      <div class="container deletion-grid">
+        <div class="prose">
+          <h2>What is removed</h2>
+          <ul>
+            <li>Your StudyBible account, email address, and linked sign-in identities.</li>
+            <li>Bookmarks, highlights, and bookmark notes synced to the server.</li>
+          </ul>
+          <p>Data saved only on a device cannot be reached from this website. Use <strong>Settings → Advanced → Clear Local Data</strong> on each device to remove local copies. App versions with an in-app Delete Account action also clear local data on that device.</p>
+          <p>If database backups are enabled, residual copies may remain for up to 30 days under Supabase's standard backup retention periods. Read our <a href="/privacy/">privacy policy</a> for more detail.</p>
+        </div>
 
-      <h2 class="text-xl font-semibold text-slate-900 dark:text-white mb-2">Verify your account</h2>
-      <p class="text-slate-700 dark:text-slate-300 mb-5">
-        Sign in using your StudyBible email and password, the Google account you used in StudyBible, or an email sign-in link. The email link works for an existing account and will not create a new one.
-      </p>
+        <div class="form-card">
+          <p class="eyebrow">Verify ownership</p>
+          <h2 class="serif" style="font-size:34px;font-weight:400;line-height:1.1;margin:0 0 12px">Sign in to continue</h2>
+          <p class="body-muted small" style="margin:0 0 28px">Use the email and password, Google account, or email sign-in link associated with your StudyBible account. The email link will not create a new account.</p>
 
-      <div id="signed-out" class="space-y-4">
-        <form id="password-form" class="space-y-3">
-          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300" for="email">Email address</label>
-          <input id="email" name="email" type="email" autocomplete="email" required class="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-4 py-3" />
-          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300" for="password">Password (if you have one)</label>
-          <input id="password" name="password" type="password" autocomplete="current-password" class="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-4 py-3" />
-          <div class="flex flex-wrap gap-3">
-            <button type="submit" class="rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-3">Sign in with password</button>
-            <button id="email-link" type="button" class="rounded-lg border border-indigo-600 text-indigo-700 dark:text-indigo-300 font-semibold px-5 py-3">Email me a sign-in link</button>
-            <button id="google-sign-in" type="button" class="rounded-lg border border-indigo-600 text-indigo-700 dark:text-indigo-300 font-semibold px-5 py-3">Sign in with Google</button>
+          <div id="signed-out">
+            <form id="password-form">
+              <div class="field"><label for="email">Email address</label><input class="input" id="email" name="email" type="email" autocomplete="email" required /></div>
+              <div class="field"><label for="password">Password</label><input class="input" id="password" name="password" type="password" autocomplete="current-password" /></div>
+              <div class="button-row" style="margin:22px 0 14px"><button class="button button-primary" type="submit">Sign in with password</button></div>
+              <div class="button-row"><button class="button" id="email-link" type="button">Email me a sign-in link</button><button class="button" id="google-sign-in" type="button">Sign in with Google</button></div>
+            </form>
           </div>
-        </form>
-      </div>
 
-      <div id="signed-in" class="hidden space-y-4">
-        <p class="text-slate-700 dark:text-slate-300">Signed in as <strong id="signed-in-email"></strong>.</p>
-        <label class="flex items-start gap-3 text-slate-700 dark:text-slate-300">
-          <input id="confirm-deletion" type="checkbox" class="mt-1" />
-          <span>I understand that deleting this StudyBible account and its synced data cannot be undone.</span>
-        </label>
-        <div class="flex flex-wrap gap-3">
-          <button id="delete-account" type="button" disabled class="rounded-lg bg-red-700 hover:bg-red-800 disabled:opacity-50 text-white font-semibold px-5 py-3">Permanently delete account</button>
-          <button id="sign-out" type="button" class="rounded-lg border border-slate-400 text-slate-700 dark:text-slate-300 px-5 py-3">Use another account</button>
+          <div id="signed-in" class="hidden">
+            <p class="body-muted small">Signed in as <strong id="signed-in-email"></strong></p>
+            <div class="danger-panel" style="margin:24px 0"><p>This permanently deletes your account and synced study data. The action cannot be undone.</p></div>
+            <label class="checkline"><input id="confirm-deletion" type="checkbox" /><span>I understand that deleting my StudyBible account and synced data cannot be undone.</span></label>
+            <div class="button-row"><button class="button button-danger" id="delete-account" type="button" disabled>Permanently delete account</button><button class="button" id="sign-out" type="button">Use another account</button></div>
+          </div>
+          <p id="status" class="status" role="status" aria-live="polite"></p>
         </div>
       </div>
-
-      <p id="status" role="status" aria-live="polite" class="mt-6 text-slate-700 dark:text-slate-300"></p>
-    </article>
+    </section>
   </main>
 </Layout>
 

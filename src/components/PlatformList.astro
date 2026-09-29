@@ -1,0 +1,13 @@
+---
+import { PLATFORMS } from '../config/constants';
+---
+
+<div class="platform-list">
+  {PLATFORMS.map(platform => (
+    <div class="platform-row">
+      <strong>{platform.name}</strong>
+      <span>{platform.detail}</span>
+      <span class:list={['badge', { 'badge-available': platform.available }]}>{platform.available ? 'Available' : 'Planned'}</span>
+    </div>
+  ))}
+</div>
