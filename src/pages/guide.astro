@@ -1,108 +1,50 @@
 ---
+import ButtonLink from '../components/ButtonLink.astro';
+import FeatureCard from '../components/FeatureCard.astro';
+import PageIntro from '../components/PageIntro.astro';
+import PlatformList from '../components/PlatformList.astro';
+import SectionHeading from '../components/SectionHeading.astro';
+import { APP_CONFIG, FEATURES } from '../config/constants';
 import Layout from '../layouts/Layout.astro';
-import Navigation from '../components/Navigation.astro';
-import { APP_CONFIG, FEATURES, TECH_STACK } from '../config/constants';
 ---
 
-<Layout title="Features - PureStream's StudyBible">
-  <Navigation currentPage="features" />
+<Layout title="Features — StudyBible" active="guide">
+  <main>
+    <PageIntro eyebrow="Inside StudyBible" title="The tools around the text." intro="Read in a focused space, compare translations, and keep the ideas you want to revisit." />
 
-  <main class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-900 py-16 px-6 relative overflow-hidden">
-    <div class="absolute top-0 left-0 w-96 h-96 bg-blue-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob dark:opacity-10"></div>
-    <div class="absolute top-0 right-0 w-96 h-96 bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000 dark:opacity-10"></div>
-    <div class="absolute -bottom-8 left-20 w-96 h-96 bg-pink-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000 dark:opacity-10"></div>
-
-    <div class="max-w-7xl mx-auto relative z-10">
-      <div class="text-center mb-16">
-        <div class="mb-6 text-7xl">⚡</div>
-        <h1 class="text-5xl md:text-6xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent mb-4">
-          Powerful Features
-        </h1>
-        <p class="text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-          Everything you need for a deep, focused Bible study experience
-        </p>
+    <section class="section">
+      <div class="container">
+        <SectionHeading eyebrow="Core features" title="A considered set of essentials" />
+        <div class="feature-grid">{FEATURES.map(feature => <FeatureCard {...feature} />)}</div>
       </div>
+    </section>
 
-      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
-        {FEATURES.map(feature => (
-          <div class="group p-8 bg-white/60 dark:bg-slate-800/60 backdrop-blur-md border border-white/20 dark:border-slate-700/20 rounded-3xl hover:shadow-2xl hover:border-blue-200 dark:hover:border-blue-800 transition-all duration-500 hover:-translate-y-2">
-            <div class="w-14 h-14 bg-slate-50 dark:bg-slate-700 rounded-2xl flex items-center justify-center text-3xl mb-6 group-hover:scale-110 group-hover:bg-blue-50 dark:group-hover:bg-blue-900/30 transition-all duration-500">
-              {feature.icon}
-            </div>
-            <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-3">{feature.title}</h3>
-            <p class="text-slate-600 dark:text-slate-300 leading-relaxed">{feature.description}</p>
-          </div>
-        ))}
-      </div>
-
-      <div class="bg-white/60 dark:bg-slate-800/60 backdrop-blur-md border border-white/20 dark:border-slate-700/20 rounded-3xl p-8 md:p-12 mb-20">
-        <h2 class="text-3xl font-bold text-slate-900 dark:text-white mb-8 text-center">Cross-Platform Availability</h2>
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-          <div class="text-center p-6 bg-white/60 dark:bg-slate-900/60 rounded-2xl border border-white/20 dark:border-slate-700/30">
-            <div class="text-4xl mb-3">🪟</div>
-            <h3 class="font-semibold text-slate-900 dark:text-white">Windows</h3>
-          </div>
-          <div class="text-center p-6 bg-white/60 dark:bg-slate-900/60 rounded-2xl border border-white/20 dark:border-slate-700/30">
-            <div class="text-4xl mb-3">🍎</div>
-            <h3 class="font-semibold text-slate-900 dark:text-white">macOS</h3>
-          </div>
-          <div class="text-center p-6 bg-white/60 dark:bg-slate-900/60 rounded-2xl border border-white/20 dark:border-slate-700/30">
-            <div class="text-4xl mb-3">🐧</div>
-            <h3 class="font-semibold text-slate-900 dark:text-white">Linux</h3>
-          </div>
-          <div class="text-center p-6 bg-white/60 dark:bg-slate-900/60 rounded-2xl border border-white/20 dark:border-slate-700/30">
-            <div class="text-4xl mb-3">🤖</div>
-            <h3 class="font-semibold text-slate-900 dark:text-white">Android</h3>
-          </div>
-          <div class="text-center p-6 bg-white/60 dark:bg-slate-900/60 rounded-2xl border border-white/20 dark:border-slate-700/30">
-            <div class="text-4xl mb-3">📱</div>
-            <h3 class="font-semibold text-slate-900 dark:text-white">iOS</h3>
-          </div>
-          <div class="text-center p-6 bg-white/60 dark:bg-slate-900/60 rounded-2xl border border-white/20 dark:border-slate-700/30">
-            <div class="text-4xl mb-3">🌐</div>
-            <h3 class="font-semibold text-slate-900 dark:text-white">Web</h3>
-          </div>
+    <section class="section section-soft">
+      <div class="container grid-two split-spacious">
+        <div>
+          <p class="eyebrow">How it works</p>
+          <h2 class="section-title">From reading to reflection.</h2>
+          <p class="lead">The app follows a familiar rhythm: find the passage, read it closely, and keep what you learn.</p>
         </div>
+        <ol class="list-clean">
+          <li><strong>Choose a text.</strong><br /><span class="body-muted small">Browse available translations and download the ones you use.</span></li>
+          <li><strong>Read side by side.</strong><br /><span class="body-muted small">Compare translations without leaving your place.</span></li>
+          <li><strong>Mark the moment.</strong><br /><span class="body-muted small">Save a bookmark, highlight a line, or write a note.</span></li>
+          <li><strong>Return anywhere.</strong><br /><span class="body-muted small">Use optional online sync to bring your study data to another device.</span></li>
+        </ol>
       </div>
+    </section>
 
-      <div class="bg-white/60 dark:bg-slate-800/60 backdrop-blur-md border border-white/20 dark:border-slate-700/20 rounded-3xl p-8 md:p-12 mb-20">
-        <h2 class="text-3xl font-bold text-slate-900 dark:text-white mb-8 text-center">Built With Modern Technology</h2>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {TECH_STACK.map(tech => (
-            <div class="bg-white/60 dark:bg-slate-900/60 backdrop-blur-sm rounded-xl p-6 text-center border border-white/20 dark:border-slate-700/30">
-              <div class="text-3xl mb-3">{tech.icon}</div>
-              <h3 class="font-semibold text-slate-900 dark:text-white">{tech.name}</h3>
-              <p class="text-sm text-slate-500 dark:text-slate-400">{tech.description}</p>
-            </div>
-          ))}
+    <section class="section">
+      <div class="container grid-two split-spacious">
+        <div>
+          <p class="eyebrow">Availability</p>
+          <h2 class="section-title">Study on your platform.</h2>
+          <p class="lead">Evaluation builds are available now for Windows, Linux, and Android. Other platforms are in development.</p>
+          <ButtonLink href={APP_CONFIG.RELEASES_URL} variant="primary" external>Get the latest build <span aria-hidden="true">↗</span></ButtonLink>
         </div>
-        <div class="mt-8 text-center">
-          <p class="text-slate-600 dark:text-slate-300">
-            Our Rust + Dioxus foundation ensures <span class="font-semibold text-blue-600 dark:text-blue-400">blazing fast performance</span> and <span class="font-semibold text-blue-600 dark:text-blue-400">native feel</span> across all platforms.
-          </p>
-        </div>
+        <PlatformList />
       </div>
-
-      <div class="text-center">
-        <h2 class="text-3xl font-bold text-slate-900 dark:text-white mb-6">Ready to Get Started?</h2>
-        <p class="text-lg text-slate-600 dark:text-slate-400 mb-8 max-w-2xl mx-auto">
-          Download {APP_CONFIG.NAME} today and experience the future of Bible study software.
-        </p>
-        <div class="flex flex-col sm:flex-row gap-4 justify-center">
-          <a
-            href="/#download"
-            class="px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-xl shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-300"
-          >
-            Download Now
-          </a>
-          <a
-            href="/feedback"
-            class="px-8 py-4 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-semibold rounded-xl shadow-md hover:shadow-lg hover:-translate-y-1 transition-all duration-300 border border-slate-200 dark:border-slate-700"
-          >
-            Share Feedback
-          </a>
-        </div>
-      </div>
-    </div>
+    </section>
   </main>
 </Layout>

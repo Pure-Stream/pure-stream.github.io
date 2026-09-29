@@ -1,0 +1,29 @@
+---
+import { APP_CONFIG } from '../config/constants';
+---
+
+<footer class="site-footer">
+  <div class="container footer-top">
+    <div>
+      <a class="brand" href="/" aria-label="StudyBible home">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span class="brand-name">Study<span>Bible</span></span>
+      </a>
+      <p class="footer-desc">A quieter place to read, study, and keep what matters. Made by PureStream.</p>
+    </div>
+    <div class="footer-links">
+      <h2 class="footer-heading">Explore</h2>
+      <a href="/guide/">Features</a>
+      <a href="/about/">About</a>
+      <a href="/feedback/">Feedback</a>
+      <a href={APP_CONFIG.GITHUB_URL} target="_blank" rel="noopener noreferrer">Releases & issues</a>
+    </div>
+    <div class="footer-links">
+      <h2 class="footer-heading">Account & privacy</h2>
+      <a href="/privacy/">Privacy policy</a>
+      <a href="/delete-account/">Delete account</a>
+      <a href={APP_CONFIG.RELEASES_URL} target="_blank" rel="noopener noreferrer">Latest build</a>
+    </div>
+  </div>
+  <div class="footer-bottom"><div class="container">© {new Date().getFullYear()} PureStream. StudyBible is under active development.</div></div>
+</footer>

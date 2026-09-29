@@ -1,45 +1,35 @@
 ---
+import PageIntro from '../components/PageIntro.astro';
+import { APP_CONFIG } from '../config/constants';
 import Layout from '../layouts/Layout.astro';
-import Navigation from '../components/Navigation.astro';
 ---
 
-<Layout title="StudyBible Privacy Policy - PureStream">
-  <Navigation currentPage="privacy" />
-  <main class="min-h-screen bg-slate-50 dark:bg-slate-950 px-6 py-12">
-    <article class="max-w-3xl mx-auto rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-6 sm:p-10 shadow-sm text-slate-700 dark:text-slate-300 leading-relaxed">
-      <h1 class="text-3xl font-bold text-slate-900 dark:text-white mb-2">StudyBible Privacy Policy</h1>
-      <p class="text-sm text-slate-500 dark:text-slate-400 mb-8">Effective September 28, 2026</p>
-      <p class="mb-6">
-        PureStream operates StudyBible. This policy covers the StudyBible app and its account deletion page. StudyBible can be used for reading and local study without creating an account. An account is needed to sync study data between devices.
-      </p>
+<Layout title="StudyBible Privacy Policy — PureStream" active="privacy">
+  <main>
+    <PageIntro eyebrow="Legal / StudyBible" title="Privacy policy" intro="How PureStream handles information in the StudyBible app and the account deletion page." />
+    <article class="article narrow prose">
+      <p class="article-meta">Effective September 28, 2026</p>
+      <p>PureStream operates StudyBible. StudyBible can be used for reading and local study without creating an account. An account is needed to sync study data between devices.</p>
 
-      <h2 class="text-xl font-semibold text-slate-900 dark:text-white mb-3">Information we handle</h2>
-      <ul class="list-disc pl-6 space-y-2 mb-6">
-        <li><strong>Account information:</strong> If you create an account, Supabase Auth processes your email address, account ID, sign-in method, and authentication credentials. If you choose Google sign-in, Google also processes that sign-in. StudyBible does not receive your Google password or store your account password in readable form.</li>
-        <li><strong>Study data:</strong> Bookmarks, verse locations, translation identifiers, highlights, and bookmark notes are saved on your device. When you sign in and use online sync, copies of these items are stored in StudyBible's Supabase database so they can appear on your other signed-in devices.</li>
-        <li><strong>Device data:</strong> Reading preferences, downloaded translations and dictionaries, and sign-in session information are stored on your device. Public content downloads and update checks contact the services hosting those files.</li>
-        <li><strong>Service request data:</strong> Supabase and the services hosting public downloads may process IP addresses and standard network request information when your device connects. GitHub Pages processes standard web requests when you visit this website. The account deletion page stores a sign-in session in your browser so you can verify and delete your account.</li>
+      <h2>Information we handle</h2>
+      <ul>
+        <li><strong>Account information.</strong> If you create an account, Supabase Auth processes your email address, account ID, sign-in method, and authentication credentials. If you choose Google sign-in, Google also processes that sign-in. StudyBible does not receive your Google password or store your account password in readable form.</li>
+        <li><strong>Study data.</strong> Bookmarks, verse locations, translation identifiers, highlights, and bookmark notes are saved on your device. When you sign in and use online sync, copies of these items are stored in StudyBible's Supabase database so they can appear on your other signed-in devices.</li>
+        <li><strong>Device data.</strong> Reading preferences, downloaded translations and dictionaries, and sign-in session information are stored on your device. Public content downloads and update checks contact the services hosting those files.</li>
+        <li><strong>Service request data.</strong> Supabase and the services hosting public downloads may process IP addresses and standard network request information when your device connects. GitHub Pages processes standard web requests when you visit this website. The account deletion page stores a sign-in session in your browser so you can verify and delete your account.</li>
       </ul>
 
-      <h2 class="text-xl font-semibold text-slate-900 dark:text-white mb-3">How we use and share information</h2>
-      <p class="mb-6">
-        We use account information to authenticate you, study data to provide optional sync, and network requests to deliver translations, dictionaries, and app updates. Supabase hosts authentication and synced data; Google handles Google sign-in if you choose it; GitHub Pages hosts this website; and GitHub and Amazon S3 host public app or study resources. These providers process data to deliver their services. We do not sell your personal data or use it for advertising.
-      </p>
+      <h2>How we use and share information</h2>
+      <p>We use account information to authenticate you, study data to provide optional sync, and network requests to deliver translations, dictionaries, and app updates. Supabase hosts authentication and synced data; Google handles Google sign-in if you choose it; GitHub Pages hosts this website; and GitHub and Amazon S3 host public app or study resources. These providers process data to deliver their services. We do not sell your personal data or use it for advertising.</p>
 
-      <h2 class="text-xl font-semibold text-slate-900 dark:text-white mb-3">Security and retention</h2>
-      <p class="mb-6">
-        StudyBible uses HTTPS for its online services. Local settings, sessions, bookmarks, and highlights are encrypted with a key held by your device's secure storage. Supabase stores account and synced data while your account exists. When you delete the account, we remove the account and synced bookmarks, highlights, and notes from active storage. If database backups are enabled, residual copies may remain for up to 30 days under Supabase's standard backup retention periods. Data stored only on a device remains there until you clear it or remove the app's data on that device.
-      </p>
+      <h2>Security and retention</h2>
+      <p>StudyBible uses HTTPS for its online services. Local settings, sessions, bookmarks, and highlights are encrypted with a key held by your device's secure storage. Supabase stores account and synced data while your account exists. When you delete the account, we remove the account and synced bookmarks, highlights, and notes from active storage. If database backups are enabled, residual copies may remain for up to 30 days under Supabase's standard backup retention periods. Data stored only on a device remains there until you clear it or remove the app's data on that device.</p>
 
-      <h2 class="text-xl font-semibold text-slate-900 dark:text-white mb-3">Your choices and deletion</h2>
-      <p class="mb-4">
-        You can use StudyBible without an account and turn off online sync. You can clear data stored on a device in <strong>Settings → Advanced → Clear Local Data</strong>. To delete an account and its synced data, use our <a class="text-blue-600 dark:text-blue-400 underline" href="/delete-account/">account deletion page</a>. App versions with an in-app Delete Account option also provide it under <strong>Settings → Online Sync</strong>. You must sign in to verify ownership. Deleting an account does not clear copies stored only on other devices.
-      </p>
-      <p class="mb-6">
-        Questions about privacy can be submitted through the <a class="text-blue-600 dark:text-blue-400 underline" href="https://github.com/Pure-Stream/StudyBible/issues/new" target="_blank" rel="noopener noreferrer">StudyBible issue form</a>. Issues are public, so please do not include passwords, tokens, private notes, or other sensitive information. Account deletion is self-service and does not require an issue.
-      </p>
+      <h2>Your choices and deletion</h2>
+      <p>You can use StudyBible without an account and turn off online sync. You can clear data stored on a device in <strong>Settings → Advanced → Clear Local Data</strong>. To delete an account and its synced data, use our <a href="/delete-account/">account deletion page</a>. App versions with an in-app Delete Account option also provide it under <strong>Settings → Online Sync</strong>. You must sign in to verify ownership. Deleting an account does not clear copies stored only on other devices.</p>
+      <p>Questions about privacy can be submitted through the <a href={`${APP_CONFIG.GITHUB_URL}/issues/new`} target="_blank" rel="noopener noreferrer">StudyBible issue form</a>. Issues are public, so please do not include passwords, tokens, private notes, or other sensitive information. Account deletion is self-service and does not require an issue.</p>
 
-      <h2 class="text-xl font-semibold text-slate-900 dark:text-white mb-3">Changes to this policy</h2>
+      <h2>Changes to this policy</h2>
       <p>We will update this page when StudyBible's data practices change and show the new effective date here.</p>
     </article>
   </main>

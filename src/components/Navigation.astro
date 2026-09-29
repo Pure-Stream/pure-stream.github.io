@@ -1,182 +1,52 @@
 ---
-import { APP_CONFIG } from '../config/constants';
+import { APP_CONFIG, NAV_ITEMS } from '../config/constants';
 
 interface Props {
-  currentPage?: 'home' | 'feedback' | 'about' | 'guide' | 'delete-account' | 'privacy';
-  showThemeToggle?: boolean;
+  currentPage?: 'home' | 'guide' | 'about' | 'feedback' | 'privacy' | 'delete-account';
 }
 
-const { currentPage = 'home', showThemeToggle = true } = Astro.props;
+const { currentPage } = Astro.props;
 ---
 
-<nav class="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-700 shadow-sm">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="flex items-center justify-between h-16 py-3">
-      <!-- Logo -->
-      <a href="/" class="flex items-center gap-2 group">
-        <span class="text-2xl transition-transform group-hover:scale-110">📖</span>
-        <span class="font-display text-xl font-bold">
-          <span class="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">PureStream's</span>
-          <span class="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent"> StudyBible</span>
-        </span>
-      </a>
+<header class="site-header">
+  <div class="container header-inner">
+    <a class="brand" href="/" aria-label="StudyBible home">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-name">Study<span>Bible</span></span>
+    </a>
 
-      <!-- Desktop Navigation Links & Actions -->
-      <div class="hidden md:flex items-center gap-6">
-        <a
-          href={currentPage === 'home' ? '#features' : '/#features'}
-          class="text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-medium transition-colors"
-        >
-          Features
-        </a>
-        <a
-          href={currentPage === 'home' ? '#download' : '/#download'}
-          class="text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-medium transition-colors"
-        >
-          Download
-        </a>
-        <a
-          href="/about"
-          class={currentPage === 'about'
-            ? 'text-blue-600 dark:text-blue-400 font-medium'
-            : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-medium transition-colors'
-          }
-        >
-          About
-        </a>
-        <a
-          href="/guide"
-          class={currentPage === 'guide'
-            ? 'text-blue-600 dark:text-blue-400 font-medium'
-            : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-medium transition-colors'
-          }
-        >
-          Guide
-        </a>
-        <a
-          href="/feedback"
-          class={currentPage === 'feedback'
-            ? 'text-blue-600 dark:text-blue-400 font-medium'
-            : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-medium transition-colors'
-          }
-        >
-          Feedback
-        </a>
+    <nav class="desktop-nav" aria-label="Main navigation">
+      {NAV_ITEMS.map(item => (
+        <a class="nav-link" href={item.href} aria-current={currentPage === item.id ? 'page' : undefined}>{item.label}</a>
+      ))}
+    </nav>
 
-        <a
-          href="/privacy/"
-          class={currentPage === 'privacy'
-            ? 'text-blue-600 dark:text-blue-400 font-medium'
-            : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-medium transition-colors'
-          }
-        >
-          Privacy
-        </a>
-
-        {showThemeToggle && (
-          <button
-            id="themeToggle"
-            class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all"
-            aria-label="Toggle theme"
-          >
-            <svg id="sunIcon" class="w-5 h-5 text-slate-600 dark:text-slate-400 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
-            </svg>
-            <svg id="moonIcon" class="w-5 h-5 text-slate-600 dark:text-slate-400 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
-            </svg>
-          </button>
-        )}
-
-        <a
-          href={APP_CONFIG.GITHUB_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          class="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-lg hover:shadow-lg transition-all text-sm"
-        >
-          GitHub
-        </a>
-      </div>
-
-      <!-- Mobile Menu Button -->
-      <div class="flex items-center gap-4 md:hidden">
-        {showThemeToggle && (
-          <button
-            id="mobileThemeToggle"
-            class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800"
-            aria-label="Toggle theme"
-          >
-            <svg class="w-5 h-5 text-slate-600 dark:text-slate-400 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
-            </svg>
-            <svg class="w-5 h-5 text-slate-600 dark:text-slate-400 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
-            </svg>
-          </button>
-        )}
-        <button
-          id="mobile-menu-toggle"
-          type="button"
-          class="p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
-        >
-          <svg id="menu-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
-          </svg>
-          <svg id="close-icon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-          </svg>
-        </button>
-      </div>
+    <div class="header-actions">
+      <button id="theme-toggle" class="theme-button" type="button" aria-label="Toggle color theme" title="Toggle color theme">◐</button>
+      <a class="button button-primary header-download" href={APP_CONFIG.RELEASES_URL} target="_blank" rel="noopener noreferrer">Download</a>
+      <button id="menu-toggle" class="menu-button" type="button" aria-label="Open menu" aria-controls="mobile-nav" aria-expanded="false">
+        <svg width="19" height="19" viewBox="0 0 19 19" fill="none" aria-hidden="true"><path d="M2 5h15M2 10h15M2 15h15" stroke="currentColor" stroke-width="1.5" /></svg>
+      </button>
     </div>
   </div>
+  <nav id="mobile-nav" class="container mobile-nav" aria-label="Mobile navigation">
+    {NAV_ITEMS.map(item => (
+      <a href={item.href} aria-current={currentPage === item.id ? 'page' : undefined}>{item.label}</a>
+    ))}
+    <a href={APP_CONFIG.RELEASES_URL} target="_blank" rel="noopener noreferrer">Download</a>
+  </nav>
+</header>
 
-  <!-- Mobile Menu Content -->
-  <div id="mobile-menu" class="hidden md:hidden border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 overflow-hidden transition-all duration-300">
-    <div class="px-4 pt-2 pb-6 space-y-2">
-      <a href="/#features" class="block px-3 py-3 rounded-lg text-base font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">Features</a>
-      <a href="/#download" class="block px-3 py-3 rounded-lg text-base font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">Download</a>
-      <a href="/about" class="block px-3 py-3 rounded-lg text-base font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">About</a>
-      <a href="/guide" class="block px-3 py-3 rounded-lg text-base font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">Guide</a>
-      <a href="/feedback" class="block px-3 py-3 rounded-lg text-base font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">Feedback</a>
-      <a href="/privacy/" class="block px-3 py-3 rounded-lg text-base font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">Privacy</a>
-      <div class="pt-4 mt-2 border-t border-slate-100 dark:border-slate-800">
-        <a href={APP_CONFIG.GITHUB_URL} target="_blank" rel="noopener noreferrer" class="block w-full text-center px-4 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-xl">GitHub</a>
-      </div>
-    </div>
-  </div>
-</nav>
-
-<script>
-  import { setupThemeToggle } from '../scripts/theme';
-
-  const toggleBtn = document.getElementById('mobile-menu-toggle');
-  const mobileMenu = document.getElementById('mobile-menu');
-  const menuIcon = document.getElementById('menu-icon');
-  const closeIcon = document.getElementById('close-icon');
-
-  if (toggleBtn && mobileMenu) {
-    toggleBtn.addEventListener('click', () => {
-      const isHidden = mobileMenu.classList.contains('hidden');
-      if (isHidden) {
-        mobileMenu.classList.remove('hidden');
-        menuIcon?.classList.add('hidden');
-        closeIcon?.classList.remove('hidden');
-      } else {
-        mobileMenu.classList.add('hidden');
-        menuIcon?.classList.remove('hidden');
-        closeIcon?.classList.add('hidden');
-      }
-    });
-  }
-
-  document.addEventListener('DOMContentLoaded', () => {
-    setupThemeToggle();
-    const mobileThemeBtn = document.getElementById('mobileThemeToggle');
-    if (mobileThemeBtn) {
-      mobileThemeBtn.addEventListener('click', () => {
-        const themeToggle = document.getElementById('themeToggle');
-        themeToggle?.click();
-      });
-    }
+<script is:inline>
+  document.getElementById('theme-toggle')?.addEventListener('click', () => {
+    const isDark = document.documentElement.classList.toggle('dark');
+    try { localStorage.setItem('theme', isDark ? 'dark' : 'light'); } catch {}
+  });
+  const menuButton = document.getElementById('menu-toggle');
+  const mobileNav = document.getElementById('mobile-nav');
+  menuButton?.addEventListener('click', () => {
+    const open = mobileNav?.classList.toggle('is-open') ?? false;
+    menuButton.setAttribute('aria-expanded', String(open));
+    menuButton.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
   });
 </script>
